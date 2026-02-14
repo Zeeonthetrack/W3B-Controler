@@ -1,0 +1,54 @@
+<!--index.wxml-->
+<view class="container">
+  <!-- 连接状态提示 -->
+  <view class="status">当前状态：{{connectStatus}}</view>
+
+  <!-- 搜索设备区域 -->
+  <view class="search-area">
+    <button 
+      class="search-btn" 
+      bindtap="startSearch" 
+      disabled="{{isSearching}}"
+    >
+      {{isSearching ? '搜索中...' : '搜索蓝牙设备'}}
+    </button>
+  </view>
+
+  <!-- 设备列表 -->
+  <view class="device-list" wx:if="{{deviceList.length > 0}}">
+    <view class="list-title">搜到的设备</view>
+    <view 
+      class="device-item" 
+      wx:for="{{deviceList}}" 
+      wx:key="deviceId"
+      bindtap="connectDevice"
+      data-deviceid="{{item.deviceId}}"
+    >
+      <text>{{item.name}}</text>
+      <text>信号：{{item.RSSI}} dBm</text>
+    </view>
+  </view>
+
+  <!-- 遥控器按钮区域（连接成功后才显示） -->
+  <view class="remote-area" wx:if="{{isConnected}}">
+    <!-- 前进按钮 -->
+    <view class="btn-row">
+      <button class="control-btn" bindtap="sendCommand" data-command="0x01">前进</button>
+    </view>
+
+    <!-- 左右停止按钮 -->
+    <view class="btn-row">
+      <button class="control-btn" bindtap="sendCommand" data-command="0x03">左转</button>
+      <button class="control-btn stop-btn" bindtap="sendCommand" data-command="0x00">停止</button>
+      <button class="control-btn" bindtap="sendCommand" data-command="0x04">右转</button>
+    </view>
+
+    <!-- 后退按钮 -->
+    <view class="btn-row">
+      <button class="control-btn" bindtap="sendCommand" data-command="0x02">后退</button>
+    </view>
+
+    <!-- 断开连接按钮 -->
+    <button class="disconnect-btn" bindtap="disconnectDevice">断开连接</button>
+  </view>
+</view>

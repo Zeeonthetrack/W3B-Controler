@@ -1,6 +1,9 @@
 <!--index.wxml-->
 <view class="container {{fontSizeMode}}">
   
+  <!-- Guide Text -->
+  <view class="guide-text {{leftVis || rightVis ? 'hidden' : ''}}">按住任意位置激活摇杆</view>
+
   <!-- === Layer 1: Touch Interaction Zones (Z-Index 1, Transparent) === -->
   <view class="touch-zones">
     <view 

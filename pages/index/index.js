@@ -32,15 +32,30 @@ Page({
     showLogPanel: false,
     showSettings: false,
     settings: {
+      useBinary: true,
+      sendInterval: 50,
       autoClearLog: false,
-      autoReconnect: false
-    }
+      fontSize: 'medium'
+    },
+    tempSettings: {}, // For holding unsaved changes
+    sendTimer: null,
   },
 
   padRect: { left: null, right: null },
   activeTouches: { left: null, right: null },
 
   onLoad() {
+    const that = this;
+    wx.getStorage({
+      key: 'userSettings',
+      success (res) {
+        if(res.data) that.setData({ settings: res.data });
+        that.startSendLoop();
+      },
+      fail () {
+        that.startSendLoop();
+      }
+    });
     this.initBluetooth();
   },
 
@@ -49,8 +64,41 @@ Page({
   },
 
   onUnload() {
+    this.stopSendLoop();
     this.disconnectDevice();
     wx.closeBluetoothAdapter();
+  },
+
+  startSendLoop() {
+    this.stopSendLoop();
+    const interval = this.data.settings.sendInterval || 50;
+    this.data.sendTimer = setInterval(() => {
+      this.sendPacketTask();
+    }, interval);
+  },
+
+  stopSendLoop() {
+    if (this.data.sendTimer) {
+      clearInterval(this.data.sendTimer);
+      this.data.sendTimer = null;
+    }
+  },
+
+  sendPacketTask() {
+    // Always calculate bytes based on current speed
+    const leftByte = this.mapSpeedToByte(this.data.leftSpeed);
+    const rightByte = this.mapSpeedToByte(this.data.rightSpeed);
+    
+    // Build packet
+    const packet = this.buildPacket(leftByte, rightByte);
+    
+    // Always log (if binary mode or whatever, logging logic remains)
+    this.appendLog(packet);
+    
+    // Only write if connected
+    if (this.data.isConnected) {
+      this.writePacket(packet);
+    }
   },
 
   initBluetooth() {
@@ -299,7 +347,6 @@ Page({
       [speedKey]: 0,
       [stickKey]: { x: 0, y: 0 }
     });
-    this.syncBytesAndSend();
   },
 
   updateJoystickByTouch(side, touch) {
@@ -338,7 +385,8 @@ Page({
       [speedKey]: speed,
       [stickKey]: { x: dx, y: dy }
     });
-    this.syncBytesAndSend();
+    // Removed direct send, now handled by loop
+    /*this.syncBytesAndSend();*/
   },
 
   findTouchById(touches, id) {
@@ -369,19 +417,11 @@ Page({
     if (!key) return;
 
     this.setData({ [key]: pressed });
-    this.syncBytesAndSend();
+    // Removed direct send
+    /*this.syncBytesAndSend();*/
   },
 
-  syncBytesAndSend() {
-    const leftByte = this.mapSpeedToByte(this.data.leftSpeed);
-    const rightByte = this.mapSpeedToByte(this.data.rightSpeed);
-    this.setData({ leftByte, rightByte });
-
-    const packet = this.buildPacket(leftByte, rightByte);
-    this.appendLog(packet);
-    this.writePacket(packet);
-  },
-
+  // Helper, now called by sendLoop
   mapSpeedToByte(speed) {
     const raw = Math.round((speed + 100) * 1.275);
     return this.clamp(raw, 0, 255);
@@ -403,16 +443,20 @@ Page({
   writePacket(packet) {
     if (!this.data.isConnected || !this.data.writeCharacteristicId) return;
 
+    // Use current settings (if relevant for packet format, but user kept packet format same)
+    // The requirement is just binary mode switch in settings but packet structure is fixed.
+    
     wx.writeBLECharacteristicValue({
       deviceId: this.data.connectedDeviceId,
       serviceId: this.data.serviceId,
       characteristicId: this.data.writeCharacteristicId,
       value: packet.buffer,
-      fail: () => {
-        wx.showToast({ title: "发送失败", icon: "none" });
+      fail: (res) => {
+        // console.log("Write failed", res);
       }
     });
   },
+
 
   appendLog(packet) {
     const bytes = Array.from(packet);
@@ -420,7 +464,13 @@ Page({
     const hex = `L:${bytes[0].toString(16).padStart(2,"0").toUpperCase()} R:${bytes[1].toString(16).padStart(2,"0").toUpperCase()} A:${bytes[2]} B:${bytes[3]} C:${bytes[4]} D:${bytes[5]} X:${bytes[6].toString(16).padStart(2,"0").toUpperCase()} T:${bytes[7].toString(16).padStart(2,"0").toUpperCase()}`;
     const time = this.formatTime(new Date());
     const next = [{ time, hex, hexRaw }, ...this.data.logList];
-    this.setData({ logList: next.slice(0, 100) });
+    
+    // Auto clear log check
+    if (this.data.settings.autoClearLog && next.length > 50) {
+       this.setData({ logList: next.slice(0, 50) });
+    } else {
+       this.setData({ logList: next.slice(0, 100) }); 
+    }
   },
 
   clearLog() {
@@ -441,10 +491,15 @@ Page({
   },
 
   toggleSettings() {
-    this.setData({ showSettings: !this.data.showSettings });
+    // Copy current settings to temp when opening
+    this.setData({ 
+      showSettings: !this.data.showSettings,
+      tempSettings: {...this.data.settings} 
+    });
   },
 
   closeSettings() {
+    // Discard changes
     this.setData({ showSettings: false });
   },
 
@@ -454,12 +509,43 @@ Page({
     this.setData({ 'settings.autoClearLog': e.detail.value });
   },
 
-  toggleAutoReconnect(e) {
-    this.setData({ 'settings.autoReconnect': e.detail.value });
+  // Settings Handlers
+  onSettingChange(e) {
+    const field = e.currentTarget.dataset.field;
+    let value = e.detail.value;
+    
+    if(field === 'sendInterval') {
+      const parsed = parseInt(value);
+      value = isNaN(parsed) ? 50 : parsed;
+    }
+
+    const temp = this.data.tempSettings;
+    temp[field] = value;
+    this.setData({ tempSettings: temp });
   },
 
-  onFilterInput(e) {
-    this.setData({ filterDeviceName: e.detail.value });
+  setFontSize(e) {
+    const size = e.currentTarget.dataset.size;
+    const temp = this.data.tempSettings;
+    temp.fontSize = size;
+    this.setData({ tempSettings: temp });
+  },
+
+  closeSettings() {
+    this.setData({ showSettings: false });
+  },
+
+  saveSettings() {
+    this.setData({
+      settings: this.data.tempSettings,
+      showSettings: false
+    });
+    
+    this.startSendLoop();
+    wx.setStorage({
+      key: 'userSettings',
+      data: this.data.settings
+    });
   },
 
   clamp(value, min, max) {

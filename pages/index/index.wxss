@@ -402,28 +402,124 @@ page {
 .item-hex { color: #FFF; font-size: 1.8vh; font-family: monospace; }
 .empty-tip { text-align: center; color: #666; margin-top: 10vh; }
 
-/* Settings List */
-.settings-list { padding-top: 2vh; }
-.setting-item {
+/* ========== Settings Panel (iOS Style) ========== */
+.ios-settings-panel {
+  width: 90vw;
+  max-width: 400px;
+  height: auto;
+  max-height: 80vh;
+  background: rgba(28, 28, 30, 0.85); /* iOS Dark Mode Grouped Background */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* Nav Bar */
+.ios-nav-bar {
+  height: 6vh;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 3vh;
+  padding: 0 4vw;
+  border-bottom: 0.5px solid rgba(84, 84, 88, 0.65);
+  background: rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
 }
-.setting-label { font-size: 2.2vh; }
-.setting-input {
+.nav-btn {
+  font-size: 2.2vh;
+  color: #0A84FF; /* iOS System Blue */
+  padding: 1vh 2vw;
+}
+.nav-btn.save { font-weight: 600; }
+.nav-title {
+  font-size: 2.2vh;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+/* Content Area */
+.ios-content {
+  flex: 1;
+  padding: 2vh 0 4vh 0;
+  background: transparent;
+}
+
+/* Groups */
+.ios-group-title {
+  padding: 0 5vw 1vh 5vw;
+  font-size: 1.6vh;
+  color: #8E8E93; /* iOS Gray */
+  text-transform: uppercase;
+}
+
+.ios-group {
+  background: rgba(44, 44, 46, 0.6); /* iOS Secondary Grouped Background */
+  margin: 0 4vw 3vh 4vw;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Cells */
+.ios-cell {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5vh 4vw;
+  background: transparent;
+  border-bottom: 0.5px solid rgba(84, 84, 88, 0.65); /* Separator */
+  min-height: 5vh;
+}
+.ios-cell.last { border-bottom: none; }
+
+.cell-label {
+  font-size: 2.2vh;
+  color: #FFFFFF;
+}
+
+.cell-input {
   text-align: right;
-  width: 20vw;
-  color: #FFF;
-  border-bottom: 1px solid #444;
-  padding: 0.5vh;
+  color: #0A84FF;
+  font-size: 2.2vh;
+  width: 30vw;
+}
+
+/* Segmented Control */
+.segment-control {
+  display: flex;
+  background: rgba(118, 118, 128, 0.24);
+  border-radius: 8px;
+  padding: 2px;
+  height: 3.5vh;
+}
+
+.segment-item {
+  padding: 0 2vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8vh;
+  color: #FFFFFF;
+  border-radius: 6px;
+  min-width: 8vw;
+  transition: all 0.2s ease;
+}
+
+.segment-item.active {
+  background: #636366;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
-
 
 .dpad-btn {
   width: 8vh;
@@ -537,66 +633,7 @@ page {
   font-size: 2vh;
 }
 
-/* ========== 设置面板浮层 ========== */
-.settings-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
-  z-index: 500;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.settings-panel {
-  width: 80vw;
-  max-width: 350px;
-  background: #1a1a1a;
-  border-radius: 12px;
-  border: 1px solid #333;
-  overflow: hidden;
-}
-
-.settings-header {
-  height: 6vh;
-  background: #333;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 4vw;
-  font-size: 2.5vh;
-  font-weight: bold;
-}
-
-.settings-header .close-btn {
-  font-size: 3vh;
-  color: #888;
-}
-
-.settings-body {
-  padding: 2vh 4vw;
-}
-
-.settings-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 2vh 0;
-  border-bottom: 1px solid #333;
-}
-
-.settings-item:last-child {
-  border-bottom: none;
-}
-
-.settings-label {
-  font-size: 2.2vh;
-  color: #ccc;
-}
-
+/* Cleaned up old styles */
 .settings-input {
   background: #333;
   border: 1px solid #555;

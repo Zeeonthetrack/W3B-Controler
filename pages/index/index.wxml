@@ -162,25 +162,54 @@ module.exports = {
 
   <!-- 设置悬浮窗 -->
   <view class="full-overlay glass-background" wx:if="{{showSettings}}" catchtap="closeSettings">
-    <view class="overlay-panel glass-panel" catchtap="stopProp">
-      <view class="panel-header">
-        <text class="panel-title">设置</text>
-        <view class="header-btn close" catchtap="closeSettings">✕</view>
+    <view class="overlay-panel ios-settings-panel" catchtap="stopProp">
+      <!-- 顶部导航栏 -->
+      <view class="ios-nav-bar">
+        <view class="nav-btn cancel" catchtap="closeSettings">取消</view>
+        <text class="nav-title">设置</text>
+        <view class="nav-btn save" catchtap="saveSettings">保存</view>
       </view>
-      <view class="panel-content settings-list">
-        <view class="setting-item">
-          <text class="setting-label">过滤设备名称</text>
-          <input class="setting-input glass-input" value="{{filterDeviceName}}" bindinput="onFilterInput" placeholder="请输入"/>
+
+      <!-- 设置内容区 -->
+      <scroll-view class="ios-content" scroll-y="true">
+        <!-- 第一组：通信参数 -->
+        <view class="ios-group-title">通信参数</view>
+        <view class="ios-group">
+          <view class="ios-cell">
+            <text class="cell-label">数据包使用二进制</text>
+            <switch checked="{{tempSettings.useBinary}}" data-field="useBinary" bindchange="onSettingChange" color="#34C759"/>
+          </view>
+          <view class="ios-cell last">
+            <text class="cell-label">发送间隔(ms)</text>
+            <input class="cell-input" type="number" value="{{tempSettings.sendInterval}}" data-field="sendInterval" bindinput="onSettingChange"/>
+          </view>
         </view>
-        <view class="setting-item">
-          <text class="setting-label">自动重连</text>
-          <switch checked="{{settings.autoReconnect}}" bindchange="toggleAutoReconnect" color="#34C759"/>
+
+        <!-- 第二组：界面显示 -->
+        <view class="ios-group-title">界面显示</view>
+        <view class="ios-group">
+          <view class="ios-cell">
+            <text class="cell-label">自动清空日志</text>
+            <switch checked="{{tempSettings.autoClearLog}}" data-field="autoClearLog" bindchange="onSettingChange" color="#34C759"/>
+          </view>
+          <view class="ios-cell last">
+            <text class="cell-label">全局字号</text>
+            <view class="segment-control">
+              <view class="segment-item {{tempSettings.fontSize==='small'?'active':''}}" data-size="small" catchtap="setFontSize">小</view>
+              <view class="segment-item {{tempSettings.fontSize==='medium'?'active':''}}" data-size="medium" catchtap="setFontSize">中</view>
+              <view class="segment-item {{tempSettings.fontSize==='large'?'active':''}}" data-size="large" catchtap="setFontSize">大</view>
+            </view>
+          </view>
         </view>
-        <view class="setting-item">
-          <text class="setting-label">自动清空日志</text>
-          <switch checked="{{settings.autoClearLog}}" bindchange="toggleAutoClear" color="#34C759"/>
+
+        <!-- 第三组：关于 -->
+        <view class="ios-group-title">关于</view>
+        <view class="ios-group">
+          <view class="ios-cell last">
+            <text class="cell-label">W3B蓝牙遥控器 v1.0</text>
+          </view>
         </view>
-      </view>
+      </scroll-view>
     </view>
   </view>
 </view>

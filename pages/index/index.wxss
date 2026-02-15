@@ -1,26 +1,294 @@
 /** index.wxss **/
+/** index.wxss **/
 page {
-  background-color: #000000;
+  background-color: #0d0d0d;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    radial-gradient(circle at 50% 50%, #1a1a1a 0%, #000000 120%);
+  background-size: 4vh 4vh, 4vh 4vh, 100% 100%;
   color: #ffffff;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif; /* High aesthetic font */
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
 }
 
 .container {
   width: 100%;
   height: 100%;
-  position: relative;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
-  background: #000;
-  
-  /* Defaults */
-  --fs-title: 2.8vh;
+
+  /* Font Defaults */
+  --fs-title: 2.5vh;
   --fs-val: 2.2vh;
-  --fs-btn: 2vh;
+  --fs-btn: 1.8vh;
   --fs-log: 1.6vh;
 }
+
+/* === Section 1: Top Status (15vh) === */
+.top-section {
+  height: 15vh;
+  width: 100vw;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4vw;
+  box-sizing: border-box;
+  z-index: 10;
+}
+
+.status-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5vh;
+}
+
+.status-row {
+  font-size: var(--fs-title);
+  font-weight: bold;
+  opacity: 0.9;
+}
+
+.action-box {
+  display: flex;
+  gap: 3vw;
+}
+
+.icon-btn {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 1vh 2vh;
+  border-radius: 4px;
+  font-size: var(--fs-btn);
+  backdrop-filter: blur(5px);
+}
+
+/* === Section 2: Middle Visual (35vh) === */
+.middle-section {
+  height: 35vh;
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 5;
+}
+
+.guide-text {
+  color: rgba(255,255,255,0.2);
+  font-size: 2vh;
+  pointer-events: none;
+}
+
+/* === Section 3: Bottom Interaction (50vh) === */
+.bottom-section {
+  height: 50vh;
+  width: 100vw;
+  display: flex;
+  position: relative;
+  z-index: 20; /* High priority touch */
+}
+
+/* Zone Definitions */
+.control-zone {
+  height: 100%;
+  position: relative;
+  /* background: rgba(255, 0, 0, 0.1); Debugging */
+}
+
+.left-zone {
+  width: 35vw;
+  border-right: 1px dashed rgba(255,255,255,0.05); /* Visual hint */
+}
+
+.center-zone {
+  width: 30vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.right-zone {
+  width: 35vw;
+  border-left: 1px dashed rgba(255,255,255,0.05); /* Visual hint */
+}
+
+/* Button Layout */
+.btn-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2vh;
+}
+
+.btn-row {
+  display: flex;
+  gap: 2vh;
+}
+
+.action-btn {
+  width: 8vh;
+  height: 8vh;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5vh; /* Fixed larger font */
+  font-weight: bold;
+  color: #fff;
+  transition: all 0.1s;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.3);
+  text-shadow: 0 1px 1px rgba(0,0,0,0.5);
+  background-color: #333;
+}
+
+/* Active State Visuals */
+.action-btn:active, .action-btn.active {
+  transform: scale(0.95) translateY(2px);
+  filter: brightness(0.85);
+  box-shadow: 0 2px 3px rgba(0,0,0,0.5);
+}
+
+.action-btn.red { background: linear-gradient(135deg, #ff6b6b, #ff4444); border: 2px solid #800; }
+.action-btn.blue { background: linear-gradient(135deg, #4facfe, #00f2fe); border: 2px solid #004080; }
+.action-btn.green { background: linear-gradient(135deg, #43e97b, #38f9d7); border: 2px solid #006030; }
+.action-btn.yellow { background: linear-gradient(135deg, #fddb92, #d1fdff); border: 2px solid #806000; color: #333; }
+.action-btn.yellow { background: linear-gradient(135deg, #ffeb3b, #fbc02d); color: #000; }
+
+/* Joystick Elements (Overlay) */
+.joystick-float {
+  position: absolute;
+  width: 20vh; /* Outer */
+  height: 20vh;
+  z-index: 100; /* Strict Top */
+  pointer-events: none; /* Pass touches to zones underneath */
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 0.1s, transform 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Removed negative margins to fix centering offset with JS */
+  margin: 0; 
+}
+
+.joystick-float.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.joystick-base {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(135deg, #3a3a3a 0%, #1a1a1a 100%);
+  box-shadow: inset 2px 2px 5px rgba(0,0,0,0.8), inset -1px -1px 2px rgba(255,255,255,0.1), 0 5px 15px rgba(0,0,0,0.5);
+  border: 1px solid #444;
+}
+
+.joystick-stick {
+  position: absolute;
+  width: 8vh;
+  height: 8vh;
+  top: 50%;
+  left: 50%;
+  margin-top: -4vh;
+  margin-left: -4vh;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #4facfe 0%, #00f2fe 100%);
+  box-shadow: 0 4px 10px rgba(0, 100, 255, 0.4), inset 0 2px 5px rgba(255,255,255,0.4);
+  /* Transform is handled inline by JS */
+}
+
+/* Modals */
+.log-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 200;
+  display: none;
+  justify-content: flex-end;
+}
+.log-overlay.show { display: flex; }
+
+.log-panel {
+  width: 40vw;
+  height: 100%;
+  background: rgba(10,10,10,0.95);
+  border-left: 1px solid #333;
+  display: flex;
+  flex-direction: column;
+  padding: 2vh;
+  box-sizing: border-box;
+  position: absolute; /* Fix flex layout breaking absolute overlays */
+  right: 0;
+  top: 0;
+}
+
+.log-header {
+  display: flex;
+  justify-content: space-between;
+  color: #fff;
+  font-size: var(--fs-btn);
+  margin-bottom: 1vh;
+  border-bottom: 1px solid #444;
+  padding-bottom: 1vh;
+}
+
+.log-actions { display: flex; gap: 2vw; }
+.close { color: #888; }
+
+.log-scroll {
+  flex: 1;
+  height: 0;
+  overflow-y: auto;
+}
+
+.log-item {
+  font-family: "Courier New", monospace;
+  font-size: var(--fs-log);
+  color: #00ff00;
+  margin-bottom: 2px;
+  white-space: nowrap;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.8);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  width: 50vw;
+  background: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 3vh;
+}
+.modal-header { text-align: center; font-size: var(--fs-title); margin-bottom: 2vh; border-bottom: 1px solid #333; padding-bottom: 1vh; }
+
+.setting-group { background: #222; padding: 1vh; border-radius: 4px; margin-bottom: 2vh; }
+.setting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1vh; font-size: var(--fs-btn); }
+.device-list-mini { max-height: 15vh; overflow-y: auto; background: #000; margin: 1vh 0; border: 1px solid #333; }
+.mini-device { padding: 1vh; border-bottom: 1px solid #222; color: #0f0; font-size: var(--fs-log); }
+
+.setting-item { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1vh; font-size: var(--fs-btn); }
+.font-size-controls { display: flex; gap: 1vw; flex: 1; justify-content: flex-end; }
+.font-btn { padding: 0.5vh 1.5vh; background: #333; border-radius: 4px; border: 1px solid #444; }
+.font-btn.active { background: #2b6fff; border-color: #2b6fff; }
+
 
 .guide-text {
   position: absolute;
@@ -146,65 +414,13 @@ page {
   background: rgba(255,255,255,0.1);
   border: 1px solid rgba(255,255,255,0.2);
   color: #fff;
-  padding: 0.5vh 1.5vh;
+  padding: 1vh 2vh;
   border-radius: 4px;
   font-size: var(--fs-btn);
   backdrop-filter: blur(5px);
 }
 
-.center-dock {
-  position: absolute;
-  bottom: 8vh;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 4vw;
-  pointer-events: auto;
-  z-index: 100; /* Force Top Z-Index */
-  padding: 10px; /* Hitbox safety */
-}
-
-.action-btn {
-  width: 8vh;
-  height: 8vh;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--fs-btn);
-  font-weight: bold;
-  color: #fff;
-  transition: all 0.1s;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.3);
-  text-shadow: 0 1px 1px rgba(0,0,0,0.5);
-  background-color: #333; /* Fallback Color */
-}
-
-/* Specific Colors with Fallbacks */
-.action-btn.red { 
-  background-color: #ff4444; 
-  background: linear-gradient(135deg, #ff6b6b, #ff4444); 
-  border: 2px solid #800; 
-}
-.action-btn.blue { 
-  background-color: #00f2fe;
-  background: linear-gradient(135deg, #4facfe, #00f2fe); 
-  border: 2px solid #004080; 
-}
-.action-btn.green { 
-  background-color: #38f9d7;
-  background: linear-gradient(135deg, #43e97b, #38f9d7); 
-  border: 2px solid #006030; 
-}
-.action-btn.yellow { 
-  background-color: #fbc02d;
-  background: linear-gradient(135deg, #ffeb3b, #fbc02d); 
-  border: 2px solid #806000; 
-  color: #000; 
-}
-
-
-/* --- Layer 4: Panels --- */
+/* === Section 2: Middle Visual (35vh) === */
 .log-overlay {
   position: absolute;
   top: 0;

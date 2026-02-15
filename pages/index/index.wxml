@@ -1,84 +1,99 @@
 <!--index.wxml-->
 <view class="container {{fontSizeMode}}">
   
-  <!-- Guide Text -->
-  <view class="guide-text {{leftVis || rightVis ? 'hidden' : ''}}">按住任意位置激活摇杆</view>
+  <!-- === Top Section: Status & Actions (Fixed 15vh) === -->
+  <view class="top-section">
+    <view class="status-box">
+      <view class="status-row">蓝牙: {{connectStatus}}</view>
+      <view class="status-row">L:{{leftSpeed}} / R:{{rightSpeed}}</view>
+    </view>
+    <view class="action-box">
+      <view class="icon-btn log-btn" catchtap="toggleLogs">LOG</view>
+      <view class="icon-btn settings-btn" catchtap="toggleSettings">设置</view>
+    </view>
+  </view>
 
-  <!-- === Layer 1: Touch Interaction Zones (Z-Index 1, Transparent) === -->
-  <view class="touch-zones">
+  <!-- === Middle Section: Visual Guide (Fixed 35vh) === -->
+  <view class="middle-section">
+    <text class="guide-text">按住左下/右下区域激活摇杆</text>
+  </view>
+
+  <!-- === Bottom Section: Interaction Zones (Fixed 50vh) === -->
+  <view class="bottom-section">
+    
+    <!-- Zone 1: Left Joystick (0-35vw) -->
     <view 
-      class="zone left-zone" 
+      class="control-zone left-zone"
       data-side="left"
       catchtouchstart="onJoystickStart"
       catchtouchmove="onJoystickMove"
       catchtouchend="onJoystickEnd"
       catchtouchcancel="onJoystickEnd"
-    ></view>
+    >
+      <!-- Joystick appears here dynamically inside this container, relative to page or container? 
+           The JS sets leftPos/rightPos. JS usually sets absolute page coordinates (pageX).
+           So floating joysticks should be outside this flex structure or absolute on top.
+           User wants joystick visual to appear at press. 
+           So let's keep the floating joysticks separate in DOM but visible.
+      -->
+    </view>
+
+    <!-- Zone 2: Buttons (35-65vw) -->
+    <view class="control-zone center-zone">
+      <view class="btn-grid">
+        <view class="btn-row">
+            <view class="action-btn red {{btnRed?'active':''}}" data-color="red" catchtouchstart="onButtonTouchStart" catchtouchend="onButtonTouchEnd">A</view>
+            <view class="action-btn blue {{btnBlue?'active':''}}" data-color="blue" catchtouchstart="onButtonTouchStart" catchtouchend="onButtonTouchEnd">B</view>
+        </view>
+        <view class="btn-row">
+            <view class="action-btn green {{btnGreen?'active':''}}" data-color="green" catchtouchstart="onButtonTouchStart" catchtouchend="onButtonTouchEnd">C</view>
+            <view class="action-btn yellow {{btnYellow?'active':''}}" data-color="yellow" catchtouchstart="onButtonTouchStart" catchtouchend="onButtonTouchEnd">D</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- Zone 3: Right Joystick (65-100vw) -->
     <view 
-      class="zone right-zone" 
+      class="control-zone right-zone"
       data-side="right"
       catchtouchstart="onJoystickStart"
       catchtouchmove="onJoystickMove"
       catchtouchend="onJoystickEnd"
       catchtouchcancel="onJoystickEnd"
-    ></view>
+    >
+    </view>
   </view>
 
-  <!-- === Layer 2: Floating Joysticks (Z-Index 5, Visible when active) === -->
-  <!-- Left Joystick -->
+  <!-- === Floating Joysticks (Global Overlay) === -->
+  <!-- Left -->
   <view 
     class="joystick-float {{leftVis ? 'visible' : ''}}" 
     style="left: {{leftPos.left}}px; top: {{leftPos.top}}px;"
     >
       <view class="joystick-base">
-        <view class="joystick-stick {{leftVis ? 'active' : ''}}" style="transform: translate({{leftStick.x}}px, {{leftStick.y}}px);"></view>
+        <view class="joystick-stick" style="transform: translate({{leftStick.x}}px, {{leftStick.y}}px);"></view>
       </view>
-      <!-- Optional: Values following joystick? Or keep them top? -->
   </view>
   
-  <!-- Right Joystick -->
+  <!-- Right -->
   <view 
     class="joystick-float {{rightVis ? 'visible' : ''}}" 
     style="left: {{rightPos.left}}px; top: {{rightPos.top}}px;"
     >
       <view class="joystick-base">
-        <view class="joystick-stick {{rightVis ? 'active' : ''}}" style="transform: translate({{rightStick.x}}px, {{rightStick.y}}px);"></view>
+        <view class="joystick-stick" style="transform: translate({{rightStick.x}}px, {{rightStick.y}}px);"></view>
       </view>
   </view>
 
-  <!-- === Layer 3: UI & Controls (Z-Index 10, Pointer Events for Buttons) === -->
-  <view class="ui-layer">
-    
-    <!-- Top Status Bar (Minimally Obtrusive) -->
-    <view class="top-bar">
-      <view class="status-text">蓝牙: {{connectStatus}} | L:{{leftSpeed}} R:{{rightSpeed}}</view>
-      <view class="top-actions">
-        <!-- Log Toggle -->
-        <view class="icon-btn log-btn" catchtap="toggleLogs">LOG</view>
-        <!-- Settings Toggle -->
-        <view class="icon-btn settings-btn" catchtap="toggleSettings">⚙</view>
-      </view>
-    </view>
-  </view>
-
-  <!-- === Layer 3.5: Floating Buttons (Direct Child for Z-Index Safety) === -->
-  <view class="center-dock">
-      <view class="action-btn red {{btnRed?'active':''}}" data-color="red" bindtouchstart="onButtonTouchStart" bindtouchend="onButtonTouchEnd">A</view>
-      <view class="action-btn blue {{btnBlue?'active':''}}" data-color="blue" bindtouchstart="onButtonTouchStart" bindtouchend="onButtonTouchEnd">B</view>
-      <view class="action-btn green {{btnGreen?'active':''}}" data-color="green" bindtouchstart="onButtonTouchStart" bindtouchend="onButtonTouchEnd">C</view>
-      <view class="action-btn yellow {{btnYellow?'active':''}}" data-color="yellow" bindtouchstart="onButtonTouchStart" bindtouchend="onButtonTouchEnd">D</view>
-  </view>
-
-  <!-- === Layer 4: Popups (Z-Index 20+) === -->
+  <!-- === Modals === -->
   
-  <!-- Log Panel (Slide in from Right) -->
-  <view class="log-overlay {{showLogs ? 'show' : ''}}" bindtap="toggleLogs">
+  <view class="log-overlay {{showLogs ? 'show' : ''}}" bindtap="toggleLogs" catchtouchmove="stopProp">
     <view class="log-panel" catchtap="stopProp">
       <view class="log-header">
         <text>数据包日志</text>
         <view class="log-actions">
           <text bindtap="clearLog">清空</text>
-          <text bindtap="toggleLogs" class="close">X</text>
+          <text bindtap="toggleLogs" class="close">关闭</text>
         </view>
       </view>
       <scroll-view class="log-scroll" scroll-y="true">
@@ -90,33 +105,29 @@
     </view>
   </view>
 
-  <!-- Settings Modal (Centered) -->
   <view class="modal-overlay" wx:if="{{showSettings}}" bindtap="closeSettings" catchtouchmove="stopProp">
     <view class="modal-content" catchtap="stopProp">
       <view class="modal-header">设置</view>
-      
       <view class="setting-group">
         <view class="setting-row">
-            <text>搜索蓝牙</text>
+            <text>搜索设备</text>
             <button size="mini" type="primary" bindtap="startSearch" disabled="{{isSearching}}">搜索</button>
         </view>
-        <view class="device-list-mini" wx:if="{{deviceList.length > 0}}">
+        <scroll-view scroll-y class="device-list-mini" wx:if="{{deviceList.length > 0}}">
             <view wx:for="{{deviceList}}" wx:key="deviceId" bindtap="connectDevice" data-deviceid="{{item.deviceId}}" class="mini-device">
                 {{item.name}}
             </view>
-        </view>
+        </scroll-view>
         <view class="setting-row">
             <text>断开连接</text>
             <button size="mini" type="warn" bindtap="disconnectDevice" disabled="{{!isConnected}}">断开</button>
         </view>
       </view>
-
       <view class="setting-item">
         <text class="setting-label">自动清空日志</text>
         <switch checked="{{settings.autoClearLog}}" bindchange="toggleAutoClear" color="#2b6fff" style="transform: scale(0.7);"/>
       </view>
-      
-      <view class="setting-item">
+       <view class="setting-item">
         <text class="setting-label">全局字号</text>
         <view class="font-size-controls">
           <view class="font-btn {{fontSizeMode === 'mode-s' ? 'active' : ''}}" catchtap="setFontSize" data-mode="mode-s">小</view>

@@ -11,9 +11,6 @@
     "navigationBarTextStyle": "black"
   },
   "permission": {
-    "scope.bluetooth": {
-      "desc": "用于连接蓝牙设备，控制STM32小车"
-    },
     "scope.userLocation": {
       "desc": "安卓搜索蓝牙需要位置权限"
     }

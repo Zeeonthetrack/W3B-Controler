@@ -27,7 +27,14 @@ Page({
 
     leftStick: { x: 0, y: 0 },
     rightStick: { x: 0, y: 0 },
-    logList: []
+    logList: [],
+    
+    // --- 新增设置数据 ---
+    showSettings: false, 
+    settings: {
+      autoClearLog: false,
+      autoReconnect: false
+    }
   },
 
   padRect: { left: null, right: null },
@@ -427,7 +434,28 @@ Page({
     this.setData({ logList: [] });
   },
 
-  formatTime(date) {
+  f,
+
+  /* --- 新增设置面板方法 (不影响核心逻辑) --- */
+  toggleSettings() {
+    this.setData({ showSettings: !this.data.showSettings });
+  },
+
+  closeSettings() {
+    this.setData({ showSettings: false });
+  },
+
+  stopProp() {
+    // 阻止点击冒泡
+  },
+
+  toggleAutoClear(e) {
+    this.setData({ 'settings.autoClearLog': e.detail.value });
+  },
+
+  toggleAutoReconnect(e) {
+    this.setData({ 'settings.autoReconnect': e.detail.value });
+  }ormatTime(date) {
     const pad = (num) => num.toString().padStart(2, "0");
     return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
   },

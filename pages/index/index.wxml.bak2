@@ -1,15 +1,11 @@
 <!--index.wxml-->
 <view class="container">
-  <!-- 1. Top Section (15%) - Status, Controls & Settings -->
+  <!-- 1. Top Section (15%) - Status & Connection Controls -->
   <view class="top-section">
-    <view class="status-row">
-      <view class="status-group">
+    <view class="status-bar">
+      <view class="status-item">
         <text class="label">状态:</text>
         <text class="value">{{connectStatus}}</text>
-      </view>
-      <!-- Settings Button (Top Right) -->
-      <view class="settings-btn" bindtap="toggleSettings">
-        <text class="gear-icon">⚙</text>
       </view>
     </view>
     
@@ -26,7 +22,7 @@
     </view>
   </view>
 
-  <!-- 2. Middle Section (20%) - Data Packets & Logs (Fixed Height, No Overflow) -->
+  <!-- 2. Middle Section (20%) - Data Packets & Logs -->
   <view class="middle-section">
     <!-- Log Area -->
     <view class="log-box">
@@ -34,7 +30,6 @@
         <text class="box-title">数据包日志</text>
         <view class="clear-btn" bindtap="clearLog">清空</view>
       </view>
-      <!-- Force scroll-view to stay within bounds -->
       <scroll-view class="log-scroll" scroll-y="true">
         <view class="log-item" wx:for="{{logList}}" wx:key="index">
           <text class="time">[{{item.time}}]</text>
@@ -43,7 +38,7 @@
       </scroll-view>
     </view>
 
-    <!-- Device List Overlay (Absolute over middle section) -->
+    <!-- Device List Overlay (Only shows when devices found) -->
     <view class="device-list-overlay" wx:if="{{deviceList.length > 0}}">
       <view class="overlay-title">点击连接设备 ({{deviceList.length}})</view>
       <scroll-view class="device-scroll" scroll-y="true">
@@ -61,9 +56,9 @@
     </view>
   </view>
 
-  <!-- 3. Bottom Section (65%) - Controllers (Fixed Position) -->
+  <!-- 3. Bottom Section (65%) - Controllers (Symmetrical) -->
   <view class="bottom-section">
-    <!-- Left Joystick -->
+    <!-- Left Joystick Area -->
     <view class="joystick-container left-container">
       <view class="data-display">
         <text>L: {{leftSpeed}}</text>
@@ -84,7 +79,7 @@
       </view>
     </view>
 
-    <!-- Center Buttons -->
+    <!-- Center Control Buttons -->
     <view class="center-controls">
       <view class="dpad-grid">
         <view class="dpad-btn red {{btnRed?'active':''}}" data-color="red" bindtouchstart="onButtonTouchStart" bindtouchend="onButtonTouchEnd">A</view>
@@ -94,7 +89,7 @@
       </view>
     </view>
 
-    <!-- Right Joystick -->
+    <!-- Right Joystick Area -->
     <view class="joystick-container right-container">
       <view class="data-display">
         <text>R: {{rightSpeed}}</text>
@@ -112,32 +107,6 @@
         <view class="joystick-bg">
           <view class="stick" style="transform: translate({{rightStick.x}}px, {{rightStick.y}}px);"></view>
         </view>
-      </view>
-    </view>
-  </view>
-
-  <!-- Floating Settings Modal (Fullscreen Overlay) -->
-  <view class="modal-overlay" wx:if="{{showSettings}}" bindtap="closeSettings" catchtouchmove="stopProp">
-    <view class="modal-content" catchtap="stopProp">
-      <view class="modal-header">设置面板</view>
-      
-      <view class="setting-item">
-        <text class="setting-label">自动清空日志</text>
-        <switch checked="{{settings.autoClearLog}}" bindchange="toggleAutoClear" color="#2b6fff" style="transform: scale(0.7);"/>
-      </view>
-      
-      <view class="setting-item">
-        <text class="setting-label">断开自动重连</text>
-        <switch checked="{{settings.autoReconnect}}" bindchange="toggleAutoReconnect" color="#2b6fff" style="transform: scale(0.7);"/>
-      </view>
-      
-      <view class="setting-item">
-        <text class="setting-label">字体大小</text>
-        <view class="setting-value">默认</view>
-      </view>
-
-      <view class="modal-footer">
-        <button class="close-btn" bindtap="closeSettings">关闭</button>
       </view>
     </view>
   </view>

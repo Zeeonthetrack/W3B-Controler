@@ -15,72 +15,52 @@ page {
   width: 100vw;
   padding: 0;
   box-sizing: border-box;
-  position: relative;
 }
 
 /* --- Top Section (15%) --- */
 .top-section {
   flex: 0 0 15vh;
   width: 100%;
-  border-bottom: 1rpx solid #333;
+  border-bottom: 2rpx solid #ffffff;
   display: flex;
   flex-direction: column;
   justify-content: center;
   padding: 0 20rpx;
   box-sizing: border-box;
-  background: #000;
-  z-index: 10;
 }
 
-.status-row {
+.status-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8rpx;
+  margin-bottom: 10rpx;
 }
 
-.status-group {
+.status-item {
+  font-size: 28rpx;
   display: flex;
   align-items: center;
-  font-size: 24rpx;
 }
 
-.status-group .value {
-  color: #00ff00;
+.status-item .value {
+  color: #00ff00; /* Green highlight for status */
   margin-left: 10rpx;
   font-weight: bold;
-}
-
-.settings-btn {
-  border: 1px solid #444;
-  border-radius: 4rpx;
-  padding: 0 10rpx;
-  height: 40rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #111;
-}
-
-.gear-icon {
-  font-size: 24rpx;
-  color: #fff;
-  line-height: 1;
 }
 
 .control-bar {
   display: flex;
   justify-content: flex-start;
-  gap: 15rpx;
+  gap: 20rpx;
 }
 
 .action-btn {
   background: transparent;
   border: 1px solid #ffffff;
   color: #ffffff;
-  font-size: 22rpx;
-  padding: 0 24rpx;
-  line-height: 44rpx;
+  font-size: 24rpx;
+  padding: 0 30rpx;
+  line-height: 50rpx;
   margin: 0;
   border-radius: 4rpx;
 }
@@ -100,12 +80,10 @@ page {
 .middle-section {
   flex: 0 0 20vh;
   width: 100%;
-  border-bottom: 1rpx solid #333;
+  border-bottom: 2rpx solid #ffffff;
   position: relative;
   display: flex;
   box-sizing: border-box;
-  overflow: hidden; /* Strict overflow control */
-  background: #000;
 }
 
 .log-box {
@@ -121,41 +99,36 @@ page {
   display: flex;
   justify-content: space-between;
   margin-bottom: 5rpx;
-  border-bottom: 1px dashed #333;
+  border-bottom: 1px dashed #444;
   padding-bottom: 5rpx;
-  flex-shrink: 0;
 }
 
 .box-title {
-  font-size: 20rpx;
-  color: #888;
+  font-size: 24rpx;
+  color: #aaa;
 }
 
 .clear-btn {
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: #00ffff;
   text-decoration: underline;
 }
 
-/* Important: Scroll View Constraints */
 .log-scroll {
   flex: 1;
-  height: 0; 
+  height: 0; /* Important for scroll-view in flex */
   width: 100%;
-  overflow-y: auto;
 }
 
 .log-item {
-  font-size: 18rpx;
+  font-size: 20rpx;
   display: flex;
-  gap: 10rpx;
+  gap: 15rpx;
   font-family: 'Courier New', Courier, monospace;
-  line-height: 1.2;
-  margin-bottom: 2rpx;
 }
 
 .log-item .time {
-  color: #666;
+  color: #888;
 }
 
 .log-item .hex {
@@ -170,21 +143,20 @@ page {
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.95);
-  z-index: 20;
-  padding: 10rpx;
+  z-index: 100;
+  padding: 20rpx;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
 }
 
 .overlay-title {
-  font-size: 24rpx;
+  font-size: 28rpx;
   text-align: center;
-  margin-bottom: 10rpx;
+  margin-bottom: 15rpx;
   color: #fff;
   border-bottom: 1px solid #444;
   padding-bottom: 10rpx;
-  flex-shrink: 0;
 }
 
 .device-scroll {
@@ -194,20 +166,20 @@ page {
 
 .device-item {
   border: 1px solid #444;
-  margin-bottom: 8rpx;
-  padding: 10rpx;
+  margin-bottom: 10rpx;
+  padding: 15rpx;
   display: flex;
   justify-content: space-between;
   background: #111;
 }
 
 .device-item .name {
-  font-size: 22rpx;
+  font-size: 26rpx;
   font-weight: bold;
 }
 
 .device-item .rssi {
-  font-size: 20rpx;
+  font-size: 22rpx;
   color: #888;
 }
 
@@ -220,50 +192,50 @@ page {
   justify-content: space-between;
   padding: 20rpx;
   box-sizing: border-box;
-  overflow: hidden;
 }
 
 .joystick-container {
-  flex: 1;
+  flex: 1; /* Left and Right take equal space */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: 1px solid #222;
+  border: 1px solid #333; /* Subtle border for zones */
   background: #050505;
-  border-radius: 8rpx;
+  border-radius: 10rpx;
 }
 
 .data-display {
   width: 100%;
   text-align: center;
-  font-size: 20rpx;
-  margin-bottom: 15rpx;
-  color: #888;
+  font-size: 24rpx;
+  margin-bottom: 20rpx;
+  color: #aaa;
   display: flex;
   flex-direction: column;
-  gap: 2rpx;
+  gap: 5rpx;
 }
 
 .byte-val {
   color: #555;
-  font-size: 18rpx;
+  font-size: 20rpx;
 }
 
 .joystick-area {
   position: relative;
-  width: 160rpx;
-  height: 160rpx;
+  width: 180rpx;
+  height: 180rpx;
+  /* Touch area slightly larger than visual */
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .joystick-bg {
-  width: 160rpx;
-  height: 160rpx;
+  width: 180rpx;
+  height: 180rpx;
   border-radius: 50%;
-  border: 2rpx solid #666;
+  border: 2rpx solid #ffffff;
   background: radial-gradient(circle, #222 0%, #000 100%);
   position: relative;
 }
@@ -276,13 +248,14 @@ page {
   background: #ffffff;
   top: 50%;
   left: 50%;
-  margin-left: -30rpx;
-  margin-top: -30rpx;
+  /* Removed transform here because it is handled inline in WXML */
+  margin-left: -30rpx; /* Center adjustment */
+  margin-top: -30rpx; /* Center adjustment */
   box-shadow: 0 0 10rpx rgba(255, 255, 255, 0.5);
 }
 
 .center-controls {
-  flex: 0 0 25%;
+  flex: 0 0 25%; /* Middle takes 25% width */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -291,18 +264,18 @@ page {
 .dpad-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 15rpx;
+  gap: 20rpx;
 }
 
 .dpad-btn {
-  width: 70rpx;
-  height: 70rpx;
+  width: 80rpx;
+  height: 80rpx;
   border-radius: 50%;
   border: 2rpx solid #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 26rpx;
+  font-size: 30rpx;
   font-weight: bold;
   background: #000;
   transition: all 0.1s;
@@ -314,6 +287,7 @@ page {
   transform: scale(0.95);
 }
 
+/* Button specific border colors for aesthetics */
 .dpad-btn.red { border-color: #ff4444; color: #ff4444; }
 .dpad-btn.blue { border-color: #4444ff; color: #4444ff; }
 .dpad-btn.green { border-color: #44ff44; color: #44ff44; }
@@ -323,61 +297,3 @@ page {
 .dpad-btn.blue.active { background: #4444ff; color: #fff; }
 .dpad-btn.green.active { background: #44ff44; color: #fff; }
 .dpad-btn.yellow.active { background: #ffff44; color: #fff; }
-
-/* --- Modal Styles --- */
-.modal-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.7);
-  z-index: 999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal-content {
-  width: 60vw;
-  background: #000;
-  border: 1px solid #fff;
-  border-radius: 10rpx;
-  padding: 30rpx;
-  display: flex;
-  flex-direction: column;
-  gap: 20rpx;
-}
-
-.modal-header {
-  font-size: 30rpx;
-  text-align: center;
-  margin-bottom: 20rpx;
-  border-bottom: 1px solid #333;
-  padding-bottom: 10rpx;
-}
-
-.setting-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 24rpx;
-  border-bottom: 1px solid #222;
-  padding-bottom: 10rpx;
-}
-
-.setting-value {
-  color: #888;
-}
-
-.modal-footer {
-  margin-top: 20rpx;
-  text-align: center;
-}
-
-.close-btn {
-  background: #333;
-  color: #fff;
-  font-size: 24rpx;
-  border: 1px solid #666;
-}

@@ -24,10 +24,9 @@ module.exports = {
       <!-- 操作按钮组 -->
       <view class="control-row">
         <view class="btn-group">
-          <view class="glass-btn primary" bindtap="startSearch" hover-class="btn-hover" wx:if="{{!isConnected && !isSearching}}">搜索</view>
-          <view class="glass-btn warning" bindtap="disconnectDevice" hover-class="btn-hover" wx:if="{{isConnected}}">断开</view>
-          <view class="glass-btn" bindtap="reconnectLast" hover-class="btn-hover" wx:if="{{!isConnected && lastDeviceId && !isSearching}}">重连</view>
-          <view class="glass-btn" bindtap="stopSearch" hover-class="btn-hover" wx:if="{{isSearching}}">停止</view>
+          <view class="glass-btn primary {{isSearching ? 'disabled' : ''}}" bindtap="startSearch" hover-class="btn-hover">搜索</view>
+          <view class="glass-btn {{isConnected || !lastDeviceId ? 'disabled' : ''}}" bindtap="reconnectLast" hover-class="btn-hover">重连</view>
+          <view class="glass-btn warning {{!isConnected ? 'disabled' : ''}}" bindtap="disconnectDevice" hover-class="btn-hover">断开</view>
         </view>
       </view>
 
@@ -92,10 +91,10 @@ module.exports = {
         class="joystick-area"
         id="leftPad"
         data-side="left"
-        catchtouchstart="onJoystickStart"
-        catchtouchmove="onJoystickMove"
-        catchtouchend="onJoystickEnd"
-        catchtouchcancel="onJoystickEnd"
+        bindtouchstart="onJoystickStart"
+        bindtouchmove="onJoystickMove"
+        bindtouchend="onJoystickEnd"
+        bindtouchcancel="onJoystickEnd"
       >
         <view class="joystick-base">
           <view class="joystick-stick" style="transform: translate({{leftStick.x}}px, {{leftStick.y}}px);"></view>
@@ -122,10 +121,10 @@ module.exports = {
         class="joystick-area"
         id="rightPad"
         data-side="right"
-        catchtouchstart="onJoystickStart"
-        catchtouchmove="onJoystickMove"
-        catchtouchend="onJoystickEnd"
-        catchtouchcancel="onJoystickEnd"
+        bindtouchstart="onJoystickStart"
+        bindtouchmove="onJoystickMove"
+        bindtouchend="onJoystickEnd"
+        bindtouchcancel="onJoystickEnd"
       >
         <view class="joystick-base">
           <view class="joystick-stick" style="transform: translate({{rightStick.x}}px, {{rightStick.y}}px);"></view>

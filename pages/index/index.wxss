@@ -1,12 +1,18 @@
-/** index.wxss - 竖屏布局 **/
+/** index.wxss - iOS Design Language Rewrite **/
 
+/* ========== Global Reset & Typography ========== */
 page {
   background-color: #000000;
-  color: #ffffff;
+  color: #FFFFFF;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
-  font-family: "PingFang SC", "San Francisco", sans-serif;
+  font-family: "SF Pro Text", "PingFang SC", "Helvetica Neue", Helvetica, sans-serif;
+  box-sizing: border-box;
+  /* Prevent scrolling/bouncing on iOS */
+  position: fixed;
+  top: 0;
+  left: 0;
 }
 
 .container {
@@ -15,11 +21,23 @@ page {
   height: 100vh;
   width: 100vw;
   padding: 0;
-  box-sizing: border-box;
+  margin: 0;
   overflow: hidden;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 4vh 4vh; /* Grid background */
 }
 
-/* ========== 顶部专属设置功能区 (20vh) ========== */
+/* Common Glass Effect */
+.glass-panel, .glass-btn, .glass-icon-btn, .top-section, .full-overlay .overlay-panel {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(20, 20, 20, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ========== Top Section (20vh) ========== */
 .top-section {
   flex: 0 0 20vh;
   width: 100vw;
@@ -27,193 +45,203 @@ page {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  padding: 0 3vw;
+  padding: 0 4vw;
   box-sizing: border-box;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  background: #0a0a0a;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.6); /* Fallback */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .top-left {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 1vh;
+  align-items: flex-start;
+  gap: 1.5vh;
   flex: 1;
 }
 
 .top-right {
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 2vw;
+  flex-direction: column; /* Changed to column to match "right aligned, top to bottom log+settings" */
+  align-items: flex-end;
+  justify-content: center;
+  gap: 1.5vh;
 }
 
+/* Status Row */
 .status-row {
   display: flex;
   align-items: center;
+  gap: 1.5vw;
 }
 
-.status-row .label {
-  font-size: 2.5vh;
-  color: #aaa;
+.status-dot {
+  width: 1.2vh;
+  height: 1.2vh;
+  border-radius: 50%;
+  background-color: #8E8E93; /* Default gray */
+  box-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
+.status-dot.disconnected { background-color: #FF3B30; box-shadow: 0 0 8px rgba(255, 59, 48, 0.4); }
+.status-dot.connecting { background-color: #FF9500; box-shadow: 0 0 8px rgba(255, 149, 0, 0.4); }
+.status-dot.connected { background-color: #34C759; box-shadow: 0 0 8px rgba(52, 199, 89, 0.4); }
+
+.status-text {
+  font-size: 2.2vh; /* Note: Reduced slightly to fit */
+  font-weight: 500;
+  color: #FFFFFF;
 }
 
-.status-row .value {
-  font-size: 2.5vh;
-  color: #00ff00;
-  font-weight: bold;
-  margin-left: 1vw;
-}
-
+/* Control Row */
 .control-row {
+  display: flex;
+}
+
+.btn-group {
   display: flex;
   gap: 2vw;
 }
 
-.action-btn {
-  background: transparent;
-  border: 1px solid #ffffff;
-  color: #ffffff;
-  font-size: 2vh;
+.glass-btn {
   padding: 0 3vw;
+  height: 4vh;
   line-height: 4vh;
-  margin: 0;
-  border-radius: 4px;
-  min-width: auto;
+  border-radius: 8px; /* Slightly rounded */
+  font-size: 2vh;
+  font-weight: 500;
+  color: #FFFFFF;
+  text-align: center;
+  transition: all 0.1s ease;
+  background: rgba(255, 255, 255, 0.15);
 }
 
-.action-btn.danger {
-  border-color: #ff4444;
-  color: #ff4444;
-}
+.glass-btn.primary { background: rgba(10, 132, 255, 0.3); border-color: rgba(10, 132, 255, 0.4); }
+.glass-btn.warning { background: rgba(255, 69, 58, 0.3); border-color: rgba(255, 69, 58, 0.4); }
+.glass-btn.disabled { opacity: 0.3; pointer-events: none; background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.3); }
+.glass-btn.btn-hover { transform: scale(0.96); opacity: 0.8; }
 
-.action-btn[disabled] {
-  opacity: 0.4;
-  border-color: #444;
-  color: #444;
-}
-
+/* Switch Row */
 .switch-row {
   display: flex;
   align-items: center;
-  gap: 2vw;
+  gap: 1.5vw;
 }
-
 .switch-label {
   font-size: 2vh;
-  color: #888;
+  color: #CCCCCC;
 }
 
-/* 单行日志显示 */
-.log-single-line {
-  background: rgba(0, 255, 0, 0.1);
-  border: 1px solid #333;
-  border-radius: 4px;
-  padding: 0.8vh 1.5vw;
-  max-width: 35vw;
-  overflow: hidden;
-}
-
-.log-single-text {
-  font-size: 1.6vh;
-  font-family: monospace;
-  color: #00ff00;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.log-btn {
+/* Top Right Buttons */
+.glass-icon-btn {
+  width: 12vw;
+  height: 5vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 2.2vh;
+  font-weight: 600;
+  color: #FFF;
   background: rgba(255, 255, 255, 0.1);
-  border: 1px solid #555;
-  color: #fff;
-  font-size: 2vh;
-  padding: 0 3vw;
-  line-height: 4vh;
-  border-radius: 4px;
+  transition: all 0.1s;
 }
 
-.settings-btn {
-  padding: 1vh 2vw;
-}
-
-.gear-icon {
-  font-size: 4vh;
-  color: #888;
-}
-
-/* ========== 中间区域 (设备列表浮层) ========== */
+/* ========== Middle Section (40vh) ========== */
 .middle-section {
-  flex: 0 0 30vh;
+  flex: 0 0 40vh;
   width: 100vw;
   position: relative;
   display: flex;
-  box-sizing: border-box;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  justify-content: center;
+  align-items: center;
 }
 
-/* 设备列表浮层 */
-.device-list-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.95);
-  z-index: 100;
-  padding: 2vh 3vw;
-  box-sizing: border-box;
+/* Log Container */
+.log-container {
+  width: 80vw;
+  height: 30vh;
+  border-radius: 16px;
   display: flex;
   flex-direction: column;
+  padding: 2vh 3vw;
+  box-sizing: border-box;
+  overflow: hidden;
+  transition: transform 0.1s;
+}
+.log-container.panel-hover {
+  transform: scale(0.99);
 }
 
-.overlay-title {
-  font-size: 2.5vh;
-  text-align: center;
-  margin-bottom: 1.5vh;
-  color: #fff;
-  border-bottom: 1px solid #444;
-  padding-bottom: 1vh;
+.log-line {
+  display: flex;
+  align-items: center;
+  gap: 2vw;
+  padding: 0.8vh 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.log-line:last-child { border-bottom: none; }
+
+.log-time { font-size: 1.8vh; color: #8E8E93; font-family: monospace; }
+.log-hex { font-size: 1.8vh; color: #D1D1D6; font-family: monospace; letter-spacing: 1px; }
+
+.log-line.highlight .log-hex { color: #34C759; font-weight: 600; }
+.log-empty { display: flex; justify-content: center; align-items: center; height: 100%; color: #666; font-size: 2vh; }
+
+/* Device List Overlay */
+.device-list-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80vw;
+  height: 35vh;
+  z-index: 20;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  padding: 2vh 3vw;
+  background: rgba(30, 30, 30, 0.95);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
-.device-scroll {
-  flex: 1;
-  height: 0;
-}
-
-.device-item {
-  border: 1px solid #333;
-  margin-bottom: 1vh;
-  padding: 1.5vh 2vw;
+.overlay-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #111;
-  border-radius: 4px;
+  padding-bottom: 1.5vh;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  margin-bottom: 1vh;
 }
+.overlay-title { font-size: 2.5vh; font-weight: 600; }
+.close-btn { font-size: 3vh; color: #8E8E93; padding: 0 1vw; }
 
-.device-item .name {
-  font-size: 2.2vh;
-  font-weight: bold;
+.device-scroll { flex: 1; height: 0; }
+.device-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5vh 1vw;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
 }
+.device-item.item-hover { background: rgba(255,255,255,0.05); }
+.device-name { font-size: 2.2vh; color: #FFF; font-weight: 500; }
+.device-rssi { font-size: 1.8vh; color: #8E8E93; }
 
-.device-item .rssi {
-  font-size: 1.8vh;
-  color: #666;
-}
-
-/* ========== 底部专属纯操作区 (50vh) ========== */
+/* ========== Bottom Section (40vh) ========== */
 .bottom-section {
-  flex: 0 0 50vh;
+  flex: 0 0 40vh;
   width: 100vw;
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 2vh; /* Slight bottom padding */
   box-sizing: border-box;
 }
 
-/* 左摇杆区 (0-40vw) */
-.joystick-zone {
+.control-zone {
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -221,82 +249,164 @@ page {
   position: relative;
 }
 
-.left-zone {
-  flex: 0 0 40vw;
-  border-right: 1px dashed rgba(255, 255, 255, 0.3);
+.left-zone, .right-zone { flex: 0 0 33vw; }
+.buttons-zone { flex: 0 0 34vw; }
+
+.joystick-value {
+  margin-bottom: 2vh;
+}
+.joystick-value text {
+  font-size: 2.5vh;
+  color: #FFF;
+  font-weight: 500;
 }
 
-/* 中间按钮区 */
-.buttons-zone {
-  flex: 0 0 20vw;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-/* 右摇杆区 (60-100vw) */
-.right-zone {
-  flex: 0 0 40vw;
-  border-left: 1px dashed rgba(255, 255, 255, 0.3);
-}
-
-/* 摇杆数值显示 */
-.data-display {
-  width: 100%;
-  text-align: center;
-  font-size: 2.2vh;
-  margin-bottom: 1vh;
-  color: #aaa;
-  display: flex;
-  flex-direction: column;
-  gap: 0.3vh;
-}
-
-.byte-val {
-  color: #555;
-  font-size: 1.6vh;
-  font-family: monospace;
-}
-
-/* 摇杆区域 */
+/* Joystick Styling */
 .joystick-area {
-  position: relative;
-  width: 25vh;
-  height: 25vh;
+  width: 24vh;
+  height: 24vh;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.joystick-bg {
-  width: 25vh;
-  height: 25vh;
+.joystick-base {
+  width: 22vh;
+  height: 22vh;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.5);
-  background: radial-gradient(circle, #1a1a1a 0%, #000 100%);
+  /* Outer plate: Light frosted gradient */
+  background: radial-gradient(circle at 50% 50%, rgba(60, 60, 60, 0.8), rgba(20, 20, 20, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 2px 10px rgba(0,0,0,0.8), 0 5px 15px rgba(0,0,0,0.3);
   position: relative;
 }
 
-.stick {
+.joystick-stick {
   position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -4vh; /* Center logic handled in JS, this is base offset */
+  margin-top: -4vh;
   width: 8vh;
   height: 8vh;
   border-radius: 50%;
-  background: #ffffff;
-  top: 50%;
-  left: 50%;
-  margin-left: -4vh;
-  margin-top: -4vh;
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+  /* Inner cap: iOS Blue gradient */
+  background: radial-gradient(circle at 30% 30%, #5e9eff, #007aff);
+  box-shadow: 0 4px 10px rgba(0, 122, 255, 0.4), inset 0 2px 5px rgba(255,255,255,0.4);
+  /* Touch action pass-through done in JS */
 }
 
-/* 按钮网格 */
-.dpad-grid {
+/* Button Grid */
+.btn-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
-  gap: 2vh;
+  gap: 2.5vh;
 }
+
+.game-btn {
+  width: 8vh;
+  height: 8vh;
+  border-radius: 2vh; /* Rounded square */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3vh;
+  font-weight: 600;
+  color: rgba(255,255,255,0.9);
+  transition: all 0.1s ease;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.game-btn.active {
+  transform: scale(0.92) translateY(2px);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  opacity: 0.9;
+}
+
+/* IOS Colors (Desaturated for UI) */
+.game-btn.red { background: linear-gradient(135deg, #FF6B6B, #CC2929); }
+.game-btn.blue { background: linear-gradient(135deg, #4DADF7, #006EDC); }
+.game-btn.green { background: linear-gradient(135deg, #51CF66, #2B8A3E); }
+.game-btn.yellow { background: linear-gradient(135deg, #FCC419, #E67700); }
+
+/* ========== Overlays (Full Screen) ========== */
+.full-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(5px);
+  animation: fadeIn 0.2s ease-out;
+}
+
+.overlay-panel {
+  width: 70vw;
+  height: 80vh;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  padding: 3vh 3vw;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  background: rgba(30, 30, 30, 0.85); /* Darker for readability */
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 2vh;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  margin-bottom: 1vh;
+}
+
+.panel-title { font-size: 3vh; font-weight: 600; }
+.header-btns { display: flex; gap: 2vw; }
+.header-btn { padding: 0.5vh 1.5vw; border-radius: 6px; background: rgba(255,255,255,0.1); font-size: 2vh; }
+.header-btn.close { background: rgba(255, 59, 48, 0.2); color: #FF453A; }
+
+.panel-content { flex: 1; overflow-y: auto; }
+
+/* Log Items in Full Panel */
+.log-item {
+  display: flex;
+  margin-bottom: 1vh;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  padding-bottom: 0.5vh;
+}
+.item-time { color: #8E8E93; font-size: 1.8vh; width: 8vw; }
+.item-hex { color: #FFF; font-size: 1.8vh; font-family: monospace; }
+.empty-tip { text-align: center; color: #666; margin-top: 10vh; }
+
+/* Settings List */
+.settings-list { padding-top: 2vh; }
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3vh;
+}
+.setting-label { font-size: 2.2vh; }
+.setting-input {
+  text-align: right;
+  width: 20vw;
+  color: #FFF;
+  border-bottom: 1px solid #444;
+  padding: 0.5vh;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 
 .dpad-btn {
   width: 8vh;

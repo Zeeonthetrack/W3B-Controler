@@ -10,24 +10,6 @@ function clamp(val, min, max) {
   return Math.max(min, Math.min(max, val));
 }
 
-function buildPacket(leftByte, rightByte, btnState) {
-  const b0 = leftByte;
-  const b1 = rightByte;
-  const b2 = btnState.red ? 1 : 0;
-  const b3 = btnState.blue ? 1 : 0; // Fixed logic: previously btnBlue ? 2 : 0, usually simpler is 1/0 but let's stick to original if known. 
-  // Wait, original was: btnRed?1:0, btnBlue?2:0, btnGreen?3:0, btnYellow?4:0. 
-  // Let me re-read the original logic from my memory of the file.
-  // Actually, standard byte definition for buttons is usually bitmask or specific values. 
-  // The corrupted file had: 
-  /*
-    const b2 = this.data.btnRed ? 1 : 0;
-    const b3 = this.data.btnBlue ? 2 : 0;
-    const b4 = this.data.btnGreen ? 3 : 0;
-    const b5 = this.data.btnYellow ? 4 : 0;
-  */
-  // I will restore this exactly.
-}
-
 Page({
   data: {
     connectStatus: "未连接",
@@ -57,6 +39,8 @@ Page({
     leftPos: { top: 0, left: 0 },
     rightVis: false,
     rightPos: { top: 0, left: 0 },
+    leftStick: { x: 0, y: 0 },
+    rightStick: { x: 0, y: 0 },
     
     // UI state
     showLogs: false,
@@ -150,6 +134,14 @@ Page({
   connectDevice(e) {
     const deviceId = e.currentTarget.dataset.deviceid;
     this.connectDeviceById(deviceId);
+  },
+
+  reconnectLast() {
+    if (this.data.lastDeviceId) {
+      this.connectDeviceById(this.data.lastDeviceId);
+    } else {
+      wx.showToast({ title: "无历史设备", icon: "none" });
+    }
   },
 
   connectDeviceById(deviceId) {
@@ -434,12 +426,9 @@ Page({
     // Log
     const hex = Array.from(packet).map(b => b.toString(16).padStart(2,'0').toUpperCase()).join(" ");
     const now = formatTime(new Date());
-    // Only update log if panel is open to save perf
-    if (this.data.showLogs) {
-        this.setData({
-            logList: [{time: now, hex}, ...this.data.logList].slice(0, 50)
-        });
-    }
+    this.setData({
+      logList: [{time: now, hex}, ...this.data.logList].slice(0, 50)
+    });
 
     this.sendData(packet);
   },

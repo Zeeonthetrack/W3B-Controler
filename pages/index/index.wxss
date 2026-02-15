@@ -1,173 +1,482 @@
-/** index.wxss **/
+/** index.wxss - 竖屏布局 **/
+
 page {
-  background-color: #0d0d0d;
-  color: #fff;
+  background-color: #000000;
+  color: #ffffff;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
-  font-family: -apple-system, sans-serif;
-  box-sizing: border-box;
+  font-family: "PingFang SC", "San Francisco", sans-serif;
 }
 
 .container {
   display: flex;
   flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  padding: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* ========== 顶部专属设置功能区 (20vh) ========== */
+.top-section {
+  flex: 0 0 20vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 3vw;
+  box-sizing: border-box;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  background: #0a0a0a;
+}
+
+.top-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1vh;
+  flex: 1;
+}
+
+.top-right {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 2vw;
+}
+
+.status-row {
+  display: flex;
+  align-items: center;
+}
+
+.status-row .label {
+  font-size: 2.5vh;
+  color: #aaa;
+}
+
+.status-row .value {
+  font-size: 2.5vh;
+  color: #00ff00;
+  font-weight: bold;
+  margin-left: 1vw;
+}
+
+.control-row {
+  display: flex;
+  gap: 2vw;
+}
+
+.action-btn {
+  background: transparent;
+  border: 1px solid #ffffff;
+  color: #ffffff;
+  font-size: 2vh;
+  padding: 0 3vw;
+  line-height: 4vh;
+  margin: 0;
+  border-radius: 4px;
+  min-width: auto;
+}
+
+.action-btn.danger {
+  border-color: #ff4444;
+  color: #ff4444;
+}
+
+.action-btn[disabled] {
+  opacity: 0.4;
+  border-color: #444;
+  color: #444;
+}
+
+.switch-row {
+  display: flex;
+  align-items: center;
+  gap: 2vw;
+}
+
+.switch-label {
+  font-size: 2vh;
+  color: #888;
+}
+
+/* 单行日志显示 */
+.log-single-line {
+  background: rgba(0, 255, 0, 0.1);
+  border: 1px solid #333;
+  border-radius: 4px;
+  padding: 0.8vh 1.5vw;
+  max-width: 35vw;
+  overflow: hidden;
+}
+
+.log-single-text {
+  font-size: 1.6vh;
+  font-family: monospace;
+  color: #00ff00;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.log-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid #555;
+  color: #fff;
+  font-size: 2vh;
+  padding: 0 3vw;
+  line-height: 4vh;
+  border-radius: 4px;
+}
+
+.settings-btn {
+  padding: 1vh 2vw;
+}
+
+.gear-icon {
+  font-size: 4vh;
+  color: #888;
+}
+
+/* ========== 中间区域 (设备列表浮层) ========== */
+.middle-section {
+  flex: 0 0 30vh;
+  width: 100vw;
+  position: relative;
+  display: flex;
+  box-sizing: border-box;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* 设备列表浮层 */
+.device-list-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-}
-
-/* Top: 25vh */
-.top-settings-area {
-  height: 25vh;
-  width: 100%;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 100;
+  padding: 2vh 3vw;
   box-sizing: border-box;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
   display: flex;
-  background: #151515;
-  z-index: 10;
+  flex-direction: column;
 }
 
-/* Middle: 50vh */
-.middle-display-area {
-  height: 50vh;
-  width: 100%;
-  position: relative;
+.overlay-title {
+  font-size: 2.5vh;
+  text-align: center;
+  margin-bottom: 1.5vh;
+  color: #fff;
+  border-bottom: 1px solid #444;
+  padding-bottom: 1vh;
+}
+
+.device-scroll {
+  flex: 1;
+  height: 0;
+}
+
+.device-item {
+  border: 1px solid #333;
+  margin-bottom: 1vh;
+  padding: 1.5vh 2vw;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #111;
+  border-radius: 4px;
+}
+
+.device-item .name {
+  font-size: 2.2vh;
+  font-weight: bold;
+}
+
+.device-item .rssi {
+  font-size: 1.8vh;
+  color: #666;
+}
+
+/* ========== 底部专属纯操作区 (50vh) ========== */
+.bottom-section {
+  flex: 0 0 50vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
   box-sizing: border-box;
+}
+
+/* 左摇杆区 (0-40vw) */
+.joystick-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.left-zone {
+  flex: 0 0 40vw;
+  border-right: 1px dashed rgba(255, 255, 255, 0.3);
+}
+
+/* 中间按钮区 */
+.buttons-zone {
+  flex: 0 0 20vw;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* Bottom: 25vh */
-.bottom-operation-area {
-  height: 25vh;
-  width: 100%;
-  display: flex;
-  box-sizing: border-box;
-  position: relative;
+/* 右摇杆区 (60-100vw) */
+.right-zone {
+  flex: 0 0 40vw;
+  border-left: 1px dashed rgba(255, 255, 255, 0.3);
 }
 
-/* Settings Internal */
-.settings-left, .settings-right {
-  flex: 1;
+/* 摇杆数值显示 */
+.data-display {
+  width: 100%;
+  text-align: center;
+  font-size: 2.2vh;
+  margin-bottom: 1vh;
+  color: #aaa;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3vh;
+}
+
+.byte-val {
+  color: #555;
+  font-size: 1.6vh;
+  font-family: monospace;
+}
+
+/* 摇杆区域 */
+.joystick-area {
+  position: relative;
+  width: 25vh;
+  height: 25vh;
   display: flex;
   align-items: center;
-  padding: 0 2vw;
-  gap: 2vw;
-  height: 100%;
+  justify-content: center;
 }
 
-.settings-left { justify-content: flex-start; flex-wrap: wrap; }
-.settings-right { justify-content: flex-end; flex-wrap: wrap; }
-
-.status-text { font-size: 2vh; font-weight: bold; color: #00e5ff; white-space: nowrap; }
-.mini-btn { font-size: 1.6vh !important; padding: 0 1.5vh !important; height: 4vh; line-height: 4vh; margin: 0 !important; min-width: auto !important; border-radius: 4px; }
-.mini-btn.primary { background: #07c160; color: #fff; }
-.mini-btn.warn { background: #fa5151; color: #fff; }
-.mini-btn.normal { background: #444; color: #fff; }
-.mini-btn[disabled] { opacity: 0.3; background: #222 !important; color: #666 !important; }
-.control-row { display: flex; gap: 1vw; }
-.switch-row { display: flex; align-items: center; gap: 1vh; }
-.label-text { font-size: 1.8vh; color: #aaa; white-space: nowrap; }
-
-.font-row { display: flex; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; margin-right: 1vw; }
-.font-btn { padding: 0.8vh 1.5vh; font-size: 1.6vh; color: #aaa; cursor: pointer; }
-.font-btn.active { background: #2b6fff; color: #fff; }
-
-.log-btn-wrapper { margin-right: 1vw; }
-.log-btn { font-size: 1.6vh; height: 4vh; line-height: 4vh; background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 0 1.5vh; }
-.settings-icon-wrapper { padding: 1vh; cursor: pointer; }
-.gear-icon { font-size: 3vh; }
-
-/* Middle */
-.grid-bg {
-  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-  background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-  background-size: 4vh 4vh;
-  z-index: 0;
-}
-.hint-text { z-index: 1; color: #666; font-size: 2vh; }
-
-/* Bottom Zones */
-.joystick-zone {
-  height: 100%;
-  box-sizing: border-box;
-  border: 1px dashed rgba(255, 255, 255, 0.3);
+.joystick-bg {
+  width: 25vh;
+  height: 25vh;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  background: radial-gradient(circle, #1a1a1a 0%, #000 100%);
   position: relative;
 }
-.left-zone { width: 35vw; }
-.right-zone { width: 35vw; }
-.buttons-zone { width: 30vw; display: flex; justify-content: center; align-items: center; }
 
-.btn-matrix {
+.stick {
+  position: absolute;
+  width: 8vh;
+  height: 8vh;
+  border-radius: 50%;
+  background: #ffffff;
+  top: 50%;
+  left: 50%;
+  margin-left: -4vh;
+  margin-top: -4vh;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+}
+
+/* 按钮网格 */
+.dpad-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
-  gap: 1.5vh;
+  gap: 2vh;
 }
-.c-btn {
-  width: 7vh; height: 7vh; border-radius: 50%;
-  display: flex; justify-content: center; align-items: center;
-  font-weight: bold; font-size: 2.2vh;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-  transition: transform 0.1s;
-}
-.c-btn:active, .c-btn.active { transform: scale(0.9); filter: brightness(1.2); }
-.red { background: #ff4444; border: 2px solid #cc0000; }
-.blue { background: #4444ff; border: 2px solid #0000cc; }
-.green { background: #44ff44; border: 2px solid #00cc00; color: #000; }
-.yellow { background: #ffff44; border: 2px solid #cccc00; color: #000; }
 
-/* Joystick Elements */
-.joystick-float {
-  position: fixed;
-  width: 20vh; height: 20vh;
-  margin-left: -10vh; margin-top: -10vh;
-  pointer-events: none;
-  display: none;
-  z-index: 100;
-}
-.joystick-float.visible { display: block; }
-.stick-outer {
-  width: 100%; height: 100%; border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  position: relative; box-shadow: 0 0 15px rgba(0,0,0,0.5);
-}
-.stick-inner {
-  width: 8vh; height: 8vh;
-  background: rgba(43, 111, 255, 0.8);
+.dpad-btn {
+  width: 8vh;
+  height: 8vh;
   border-radius: 50%;
-  position: absolute; top: 50%; left: 50%;
-  margin-top: -4vh; margin-left: -4vh;
-  box-shadow: 0 0 10px rgba(43, 111, 255, 0.5);
+  border: 2px solid #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3vh;
+  font-weight: bold;
+  background: #000;
+  transition: all 0.1s;
 }
 
-/* Device List */
-.device-list-float {
-  position: absolute; top: 8vh; left: 20vw;
-  width: 30vw; max-height: 40vh;
-  background: #222; border: 1px solid #444; z-index: 300;
+.dpad-btn.active {
+  transform: scale(0.9);
 }
-.device-item { padding: 1.5vh; border-bottom: 1px solid #333; font-size: 1.8vh; }
 
-/* Logs */
+.dpad-btn.red { border-color: #ff4444; color: #ff4444; }
+.dpad-btn.blue { border-color: #4444ff; color: #4444ff; }
+.dpad-btn.green { border-color: #44ff44; color: #44ff44; }
+.dpad-btn.yellow { border-color: #ffff44; color: #ffff44; }
+
+.dpad-btn.red.active { background: #ff4444; color: #fff; }
+.dpad-btn.blue.active { background: #4444ff; color: #fff; }
+.dpad-btn.green.active { background: #44ff44; color: #fff; }
+.dpad-btn.yellow.active { background: #ffff44; color: #000; }
+
+/* ========== 日志悬浮窗 ========== */
 .log-overlay {
-  position: fixed; top: 26vh; right: 2vw;
-  width: 40vw; height: 48vh;
-  background: rgba(0,0,0,0.85); border: 1px solid #333;
-  z-index: 200; display: flex; flex-direction: column;
-  backdrop-filter: blur(10px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 500;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
-.log-header { height: 4vh; background: #333; display: flex; justify-content: space-between; align-items: center; padding: 0 1vh; font-size: 1.6vh; }
-.close-log { font-size: 2.5vh; cursor: pointer; color: #fff; padding: 0 1vh; }
-.log-scroll { flex: 1; padding: 1vh; }
-.log-item { font-family: monospace; font-size: 1.4vh; margin-bottom: 0.5vh; display: flex; gap: 1vh; }
-.log-time { color: #888; }
-.log-hex { color: #0f0; }
 
-/* Font Scaling */
-.mode-s { font-size: 90%; }
-.mode-l { font-size: 110%; }
+.log-panel {
+  width: 85vw;
+  max-width: 400px;
+  max-height: 60vh;
+  background: #1a1a1a;
+  border-radius: 12px;
+  border: 1px solid #333;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.log-panel-header {
+  height: 5vh;
+  background: #333;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 3vw;
+  font-size: 2.2vh;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.log-panel-btns {
+  display: flex;
+  align-items: center;
+  gap: 3vw;
+}
+
+.log-panel-clear {
+  font-size: 1.8vh;
+  color: #00ffff;
+  text-decoration: underline;
+}
+
+.log-panel-close {
+  font-size: 2.5vh;
+  color: #888;
+}
+
+.log-panel-scroll {
+  flex: 1;
+  padding: 1.5vh 3vw;
+  max-height: 50vh;
+}
+
+.log-item {
+  font-size: 1.8vh;
+  display: flex;
+  gap: 2vw;
+  font-family: monospace;
+  margin-bottom: 0.8vh;
+}
+
+.log-item .time {
+  color: #666;
+}
+
+.log-item .hex {
+  color: #00ff00;
+}
+
+.log-empty {
+  text-align: center;
+  padding: 3vh 0;
+  color: #666;
+  font-size: 2vh;
+}
+
+/* ========== 设置面板浮层 ========== */
+.settings-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 500;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.settings-panel {
+  width: 80vw;
+  max-width: 350px;
+  background: #1a1a1a;
+  border-radius: 12px;
+  border: 1px solid #333;
+  overflow: hidden;
+}
+
+.settings-header {
+  height: 6vh;
+  background: #333;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4vw;
+  font-size: 2.5vh;
+  font-weight: bold;
+}
+
+.settings-header .close-btn {
+  font-size: 3vh;
+  color: #888;
+}
+
+.settings-body {
+  padding: 2vh 4vw;
+}
+
+.settings-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2vh 0;
+  border-bottom: 1px solid #333;
+}
+
+.settings-item:last-child {
+  border-bottom: none;
+}
+
+.settings-label {
+  font-size: 2.2vh;
+  color: #ccc;
+}
+
+.settings-input {
+  background: #333;
+  border: 1px solid #555;
+  border-radius: 4px;
+  padding: 1vh 2vw;
+  color: #fff;
+  font-size: 2vh;
+  width: 45%;
+  text-align: right;
+}

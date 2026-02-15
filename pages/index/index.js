@@ -1,15 +1,6 @@
 const SERVICE_UUID = "0000FFE0-0000-1000-8000-00805F9B34FB";
 const CHAR_UUID = "0000FFE1-0000-1000-8000-00805F9B34FB";
 
-function formatTime(date) {
-  const pad = (num) => num.toString().padStart(2, "0");
-  return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
-}
-
-function clamp(val, min, max) {
-  return Math.max(min, Math.min(max, val));
-}
-
 Page({
   data: {
     connectStatus: "未连接",
@@ -34,43 +25,33 @@ Page({
     btnGreen: 0,
     btnYellow: 0,
 
-    // Dynamic interaction state
-    leftVis: false,
-    leftPos: { top: 0, left: 0 },
-    rightVis: false,
-    rightPos: { top: 0, left: 0 },
     leftStick: { x: 0, y: 0 },
     rightStick: { x: 0, y: 0 },
-    
-    // UI state
-    showLogs: false,
     logList: [],
-    showSettings: false, 
-    fontSizeMode: "mode-m", // Default medium font
+
+    showLogPanel: false,
+    showSettings: false,
     settings: {
       autoClearLog: false,
       autoReconnect: false
     }
   },
 
-  // Internal state not for wxml binding
   padRect: { left: null, right: null },
   activeTouches: { left: null, right: null },
 
   onLoad() {
-    const savedMode = wx.getStorageSync('fontSizeMode');
-    if (savedMode) {
-      this.setData({ fontSizeMode: savedMode });
-    }
     this.initBluetooth();
+  },
+
+  onReady() {
+    this.measurePads();
   },
 
   onUnload() {
     this.disconnectDevice();
     wx.closeBluetoothAdapter();
   },
-
-  // --- Bluetooth Logic ---
 
   initBluetooth() {
     wx.openBluetoothAdapter({
@@ -83,6 +64,7 @@ Page({
               bleAvailable: false,
               isConnected: false
             });
+            wx.showToast({ title: "请开启手机蓝牙", icon: "none" });
           } else {
             this.setData({ bleAvailable: true, connectStatus: this.data.isConnected ? "已连接" : "未连接" });
           }
@@ -90,6 +72,29 @@ Page({
       },
       fail: () => {
         this.setData({ bleAvailable: false, connectStatus: "蓝牙不可用" });
+        wx.showToast({ title: "请开启手机蓝牙", icon: "none" });
+      }
+    });
+  },
+
+  checkLocationPermission() {
+    const system = wx.getSystemInfoSync();
+    if (system.platform !== "android") return;
+
+    wx.getSetting({
+      success: (res) => {
+        if (!res.authSetting["scope.userLocation"]) {
+          wx.showModal({
+            title: "需要位置权限",
+            content: "安卓搜索蓝牙需要开启位置权限",
+            confirmText: "去开启",
+            success: (modalRes) => {
+              if (modalRes.confirm) {
+                wx.openSetting();
+              }
+            }
+          });
+        }
       }
     });
   },
@@ -97,37 +102,47 @@ Page({
   startSearch() {
     if (this.data.isSearching) return;
     if (!this.data.bleAvailable) {
-      wx.showToast({ title: "请开启蓝牙", icon: "none" });
+      wx.showToast({ title: "请开启手机蓝牙", icon: "none" });
       return;
     }
 
+    this.checkLocationPermission();
+
     this.setData({ deviceList: [], isSearching: true });
+
     wx.startBluetoothDevicesDiscovery({
       allowDuplicatesKey: false,
       success: () => {
-        wx.showToast({ title: "搜索中...", icon: "loading" });
+        wx.showToast({ title: "正在搜索设备...", icon: "loading" });
         wx.onBluetoothDeviceFound((res) => {
           res.devices.forEach((device) => {
             if (!device.name || device.name.indexOf(this.data.filterDeviceName) === -1) return;
+
             const list = this.data.deviceList;
-            if (!list.some((item) => item.deviceId === device.deviceId)) {
+            const isExist = list.some((item) => item.deviceId === device.deviceId);
+            if (!isExist) {
               list.push(device);
               this.setData({ deviceList: list });
             }
           });
         });
-        setTimeout(() => this.stopSearch(), 10000);
+
+        setTimeout(() => {
+          this.stopSearch();
+        }, 10000);
       },
       fail: () => {
         this.setData({ isSearching: false });
-        wx.showToast({ title: "搜索失败", icon: "none" });
+        wx.showToast({ title: "搜索失败，请检查权限", icon: "none" });
       }
     });
   },
 
   stopSearch() {
     wx.stopBluetoothDevicesDiscovery({
-      success: () => this.setData({ isSearching: false })
+      success: () => {
+        this.setData({ isSearching: false });
+      }
     });
   },
 
@@ -137,16 +152,14 @@ Page({
   },
 
   reconnectLast() {
-    if (this.data.lastDeviceId) {
-      this.connectDeviceById(this.data.lastDeviceId);
-    } else {
-      wx.showToast({ title: "无历史设备", icon: "none" });
-    }
+    if (!this.data.lastDeviceId || this.data.isConnected) return;
+    this.connectDeviceById(this.data.lastDeviceId);
   },
 
   connectDeviceById(deviceId) {
     if (!deviceId || this.data.isConnected) return;
-    wx.showLoading({ title: "连接中..." });
+
+    wx.showLoading({ title: "正在连接..." });
     this.stopSearch();
 
     wx.createBLEConnection({
@@ -154,32 +167,32 @@ Page({
       success: () => {
         this.setData({
           connectedDeviceId: deviceId,
-          lastDeviceId: deviceId, // Save for reconnect
+          lastDeviceId: deviceId,
           connectStatus: "已连接",
           isConnected: true
         });
         wx.hideLoading();
         wx.showToast({ title: "连接成功" });
 
-        setTimeout(() => this.getDeviceService(deviceId), 500);
+        setTimeout(() => {
+          this.getDeviceService(deviceId);
+        }, 500);
 
         wx.onBLEConnectionStateChange((res) => {
           if (!res.connected) {
             this.setData({
-              connectStatus: "断开",
+              connectStatus: "连接已断开",
               isConnected: false,
               connectedDeviceId: "",
               writeCharacteristicId: ""
             });
-            if (this.data.settings.autoReconnect) {
-               // Simple auto-reconnect logic could go here
-            }
+            wx.showToast({ title: "连接已断开", icon: "none" });
           }
         });
       },
       fail: () => {
         wx.hideLoading();
-        wx.showToast({ title: "连接失败", icon: "none" });
+        wx.showToast({ title: "连接失败，请靠近设备", icon: "none" });
       }
     });
   },
@@ -188,16 +201,16 @@ Page({
     wx.getBLEDeviceServices({
       deviceId,
       success: (res) => {
-        const service = res.services.find((item) => item.uuid.toUpperCase().includes(this.data.serviceId.substring(4, 8))); // Loose matching or exact
-        // The original code used exact match
-        const exactService = res.services.find((item) => item.uuid.toUpperCase() === this.data.serviceId.toUpperCase());
-        
-        if (exactService) {
-           this.getDeviceCharacteristic(deviceId, exactService.uuid);
-        } else {
-           // Fallback to first likely service if needed, but strict is better
-           wx.showToast({ title: "服务未找到", icon: "none" }); 
+        const service = res.services.find((item) => item.uuid.toUpperCase() === this.data.serviceId.toUpperCase());
+        if (!service) {
+          wx.showToast({ title: "未找到匹配服务", icon: "none" });
+          return;
         }
+
+        this.getDeviceCharacteristic(deviceId, service.uuid);
+      },
+      fail: () => {
+        wx.showToast({ title: "获取服务失败", icon: "none" });
       }
     });
   },
@@ -207,20 +220,25 @@ Page({
       deviceId,
       serviceId,
       success: (res) => {
-        const char = res.characteristics.find(
+        const characteristic = res.characteristics.find(
           (item) => item.uuid.toUpperCase() === this.data.characteristicId.toUpperCase()
         );
-        if (char) {
-          this.setData({ writeCharacteristicId: char.uuid, serviceId });
-        } else {
-          wx.showToast({ title: "特征值未找到", icon: "none" });
+        if (!characteristic || !characteristic.properties.write) {
+          wx.showToast({ title: "未找到可写特征值", icon: "none" });
+          return;
         }
+
+        this.setData({ writeCharacteristicId: characteristic.uuid, serviceId });
+      },
+      fail: () => {
+        wx.showToast({ title: "获取特征值失败", icon: "none" });
       }
     });
   },
 
   disconnectDevice() {
     if (!this.data.isConnected) return;
+
     wx.closeBLEConnection({
       deviceId: this.data.connectedDeviceId,
       success: () => {
@@ -230,273 +248,222 @@ Page({
           connectedDeviceId: "",
           writeCharacteristicId: ""
         });
+        wx.showToast({ title: "已断开连接" });
       }
     });
   },
 
-  // --- Core Interaction Logic (Dynamic Joystick "Zero Burden") ---
+  measurePads() {
+    const query = wx.createSelectorQuery();
+    query.select("#leftPad").boundingClientRect();
+    query.select("#rightPad").boundingClientRect();
+    query.exec((res) => {
+      if (res[0]) this.padRect.left = res[0];
+      if (res[1]) this.padRect.right = res[1];
+    });
+  },
 
   onJoystickStart(e) {
     const side = e.currentTarget.dataset.side;
-    if (this.activeTouches[side] !== null) return; // Prevent multi-touch on same side if already active
+    if (!this.padRect[side]) return;
 
     const touch = e.changedTouches[0];
-    
-    // 使用新版 API 获取窗口信息以消除警告，兼容旧版
-    let windowHeight;
-    try {
-        const info = wx.getWindowInfo();
-        windowHeight = info.windowHeight;
-    } catch (error) {
-        // Fallback for older library versions
-        const info = wx.getSystemInfoSync();
-        windowHeight = info.windowHeight;
-    }
-    
-    // Joystick size is 20vh.
-    const joySizePixels = windowHeight * 0.20; 
-
-    // Center the joystick visually on the finger
-    const left = touch.pageX - joySizePixels / 2;
-    const top = touch.pageY - joySizePixels / 2;
-
-    const posKey = side === "left" ? "leftPos" : "rightPos";
-    const visKey = side === "left" ? "leftVis" : "rightVis";
-
-    this.setData({
-      [visKey]: true,
-      [posKey]: { left, top }
-    });
-
-    // Record the "Zero point" rect for calculation
-    this.padRect[side] = {
-      centerX: touch.pageX,
-      centerY: touch.pageY,
-      maxRadius: joySizePixels * 0.4 // 20vh total, inner is ~8vh, so movement radius is around there. Let's use 40% of box size as max reach.
-    };
-
     this.activeTouches[side] = touch.identifier;
-    this.updateJoystick(side, touch);
+    this.updateJoystickByTouch(side, touch);
   },
 
   onJoystickMove(e) {
     const side = e.currentTarget.dataset.side;
-    const id = this.activeTouches[side];
-    if (id === null) return;
+    const activeId = this.activeTouches[side];
+    if (activeId === null) return;
 
-    const touch = Array.from(e.changedTouches).find(t => t.identifier === id);
+    const touch = this.findTouchById(e.changedTouches, activeId);
     if (!touch) return;
 
-    this.updateJoystick(side, touch);
+    this.updateJoystickByTouch(side, touch);
   },
 
   onJoystickEnd(e) {
     const side = e.currentTarget.dataset.side;
-    const id = this.activeTouches[side];
-    if (id === null) return;
-    
-    const touch = Array.from(e.changedTouches).find(t => t.identifier === id);
+    const activeId = this.activeTouches[side];
+    if (activeId === null) return;
+
+    const touch = this.findTouchById(e.changedTouches, activeId);
     if (!touch) return;
 
     this.activeTouches[side] = null;
-    this.padRect[side] = null;
-
-    const visKey = side === "left" ? "leftVis" : "rightVis";
     const speedKey = side === "left" ? "leftSpeed" : "rightSpeed";
+    const stickKey = side === "left" ? "leftStick" : "rightStick";
 
     this.setData({
-      [visKey]: false,
-      [speedKey]: 0
+      [speedKey]: 0,
+      [stickKey]: { x: 0, y: 0 }
     });
-    this.syncPacket();
+    this.syncBytesAndSend();
   },
 
-  updateJoystick(side, touch) {
+  updateJoystickByTouch(side, touch) {
     const rect = this.padRect[side];
     if (!rect) return;
 
-    let dx = touch.pageX - rect.centerX;
-    let dy = touch.pageY - rect.centerY; // dy is positive when going DOWN
-    // We usually want Up to be positive speed, so -dy.
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const stickRadius = rect.width * 0.16;
+    const maxRadius = rect.width / 2 - stickRadius;
 
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    
-    // Saturation Logic: Reach 100% speed at 60% of physical travel
-    // Physical travel max is rect.maxRadius
-    const effectiveMaxDist = rect.maxRadius * 0.6; 
-    
-    let normalized = dist / effectiveMaxDist; 
-    if (normalized > 1) normalized = 1;
+    let dx = touch.pageX - centerX;
+    let dy = touch.pageY - centerY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
 
-    // Direction (only Y axis matters for tank drive speed? OR is it x/y?) 
-    // The previous logic had leftStick: {x, y} but mainly sent SPEED.
-    // Tank mode usually sends raw speed per track.
-    // mapSpeedToByte uses leftSpeed/rightSpeed. 
-    // Assuming vertical control mainly.
-    // Let's preserve the standard joystick math:
-    
-    // Calculate vertical component ratio relative to full stick throw
-    // But normalized by the "60% saturation" rule
-    
-    // If we only care about Y for speed:
-    // val = (-dy / effectiveMaxDist) * 100
-    // But we should clamp the distance first to handle circle constraints if visual stick moves?
-    // The visual stick is handled by CSS or WXML? 
-    // Actually current WXML might rely on us updating `leftStick` style? 
-    // The previous code updated `leftStick: {x, y}` for the inner ball movement.
-    
-    // Visual update (inner ball) should follow finger up to maxRadius
-    let visualDist = dist;
-    let visualDx = dx;
-    let visualDy = dy;
-    
-    if (visualDist > rect.maxRadius) {
-       const scale = rect.maxRadius / visualDist;
-       visualDx *= scale;
-       visualDy *= scale;
+    if (distance > maxRadius) {
+      const scale = maxRadius / distance;
+      dx *= scale;
+      dy *= scale;
     }
-    
-    // Logic update (Speed)
-    // -dy because Up is negative screen coordinate
-    // Saturation at 60% of maxRadius.
-    let speedVal = (-dy / (rect.maxRadius * 0.6)) * 100;
-    speedVal = clamp(Math.round(speedVal), -100, 100);
+
+    const value = Math.round((-dy / (maxRadius * 0.6)) * 100);
+    const speed = this.clamp(value, -100, 100);
 
     const speedKey = side === "left" ? "leftSpeed" : "rightSpeed";
-    // If using visual stick in WXML:
-    // Need to set `leftStick` translation in data if WXML uses it.
-    // The user's WXML had: <view class="joystick-handle" style="transform: translate({{leftStick.x}}px, {{leftStick.y}}px)"></view>
-    // So distinct from speed calculation.
+    const stickKey = side === "left" ? "leftStick" : "rightStick";
 
-    // Optimize setData
-    const StickKey = side === "left" ? "leftStick" : "rightStick"; // Note: WXML probably uses specific names? 
-    // In previous code: `leftStick: { x: 0, y: 0 }`
-    
-    if (this.data[speedKey] !== speedVal) {
-        this.setData({
-            [speedKey]: speedVal,
-            [StickKey]: { x: visualDx, y: visualDy }
-        });
-        this.syncPacket();
-    } else {
-        // Just update visual if speed didn't change (e.g. lateral movement)
-        this.setData({
-            [StickKey]: { x: visualDx, y: visualDy }
-        });
+    if (Math.abs(speed - this.data[speedKey]) < 2) {
+      this.setData({
+        [stickKey]: { x: dx, y: dy }
+      });
+      return;
     }
+
+    this.setData({
+      [speedKey]: speed,
+      [stickKey]: { x: dx, y: dy }
+    });
+    this.syncBytesAndSend();
   },
 
-  // --- Buttons ---
-  
+  findTouchById(touches, id) {
+    for (let i = 0; i < touches.length; i += 1) {
+      if (touches[i].identifier === id) return touches[i];
+    }
+    return null;
+  },
+
   onButtonTouchStart(e) {
     const color = e.currentTarget.dataset.color;
-    this.setButton(color, 1);
+    this.updateButtonState(color, 1);
   },
-  
+
   onButtonTouchEnd(e) {
     const color = e.currentTarget.dataset.color;
-    this.setButton(color, 0);
+    this.updateButtonState(color, 0);
   },
-  
-  setButton(color, val) {
-    const map = { red: 'btnRed', blue: 'btnBlue', green: 'btnGreen', yellow: 'btnYellow' };
+
+  updateButtonState(color, pressed) {
+    const map = {
+      red: "btnRed",
+      blue: "btnBlue",
+      green: "btnGreen",
+      yellow: "btnYellow"
+    };
     const key = map[color];
-    if (key) {
-      this.setData({ [key]: val });
-      this.syncPacket();
-    }
+    if (!key) return;
+
+    this.setData({ [key]: pressed });
+    this.syncBytesAndSend();
   },
 
-  // --- Comms ---
+  syncBytesAndSend() {
+    const leftByte = this.mapSpeedToByte(this.data.leftSpeed);
+    const rightByte = this.mapSpeedToByte(this.data.rightSpeed);
+    this.setData({ leftByte, rightByte });
 
-  syncPacket() {
-    // Map speed -100..100 to 0..255 (127 center)
-    // 0 -> 127
-    // 100 -> 255
-    // -100 -> 0
-    // Formula: (speed + 100) / 200 * 255 => (speed + 100) * 1.275
-    const lb = Math.round((this.data.leftSpeed + 100) * 1.275);
-    const rb = Math.round((this.data.rightSpeed + 100) * 1.275);
-    
-    const leftByte = clamp(lb, 0, 255);
-    const rightByte = clamp(rb, 0, 255);
-
-    const packet = this.createPacketData(leftByte, rightByte);
-    
-    // Log
-    const hex = Array.from(packet).map(b => b.toString(16).padStart(2,'0').toUpperCase()).join(" ");
-    const now = formatTime(new Date());
-    this.setData({
-      logList: [{time: now, hex}, ...this.data.logList].slice(0, 50)
-    });
-
-    this.sendData(packet);
+    const packet = this.buildPacket(leftByte, rightByte);
+    this.appendLog(packet);
+    this.writePacket(packet);
   },
 
-  createPacketData(l, r) {
-    // Protocol:
-    // B0: Left Motor
-    // B1: Right Motor
-    // B2..B5: Buttons (1,2,3,4 if pressed)
-    // B6: XOR Check
-    // B7: Tail (XOR ^ 0x55)
-    
-    const b0 = l;
-    const b1 = r;
-    const b2 = this.data.btnRed ? 0x01 : 0x00;
-    const b3 = this.data.btnBlue ? 0x02 : 0x00;
-    const b4 = this.data.btnGreen ? 0x03 : 0x00;
-    const b5 = this.data.btnYellow ? 0x04 : 0x00;
-    
+  mapSpeedToByte(speed) {
+    const raw = Math.round((speed + 100) * 1.275);
+    return this.clamp(raw, 0, 255);
+  },
+
+  buildPacket(leftByte, rightByte) {
+    const b0 = leftByte;
+    const b1 = rightByte;
+    const b2 = this.data.btnRed ? 1 : 0;
+    const b3 = this.data.btnBlue ? 2 : 0;
+    const b4 = this.data.btnGreen ? 3 : 0;
+    const b5 = this.data.btnYellow ? 4 : 0;
     const b6 = b0 ^ b1 ^ b2 ^ b3 ^ b4 ^ b5;
     const b7 = b6 ^ 0x55;
-    
-    return new Uint8Array([b0, b1, b2, b3, b4, b5, b6, b7]).buffer;
+
+    return new Uint8Array([b0, b1, b2, b3, b4, b5, b6, b7]);
   },
 
-  sendData(buffer) {
+  writePacket(packet) {
     if (!this.data.isConnected || !this.data.writeCharacteristicId) return;
+
     wx.writeBLECharacteristicValue({
       deviceId: this.data.connectedDeviceId,
       serviceId: this.data.serviceId,
       characteristicId: this.data.writeCharacteristicId,
-      value: buffer,
-      fail: (err) => {
-         // console.error(err);
+      value: packet.buffer,
+      fail: () => {
+        wx.showToast({ title: "发送失败", icon: "none" });
       }
     });
   },
 
-  // --- UI Helpers ---
-
-  toggleLogs() {
-    this.setData({ showLogs: !this.data.showLogs });
+  appendLog(packet) {
+    const hex = Array.from(packet)
+      .map((v) => v.toString(16).padStart(2, "0"))
+      .join(" ")
+      .toUpperCase();
+    const time = this.formatTime(new Date());
+    const next = [{ time, hex }, ...this.data.logList];
+    this.setData({ logList: next.slice(0, 100) });
   },
-  
+
+  clearLog() {
+    this.setData({ logList: [] });
+  },
+
+  formatTime(date) {
+    const pad = (num) => num.toString().padStart(2, "0");
+    return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+  },
+
+  toggleLogPanel() {
+    this.setData({ showLogPanel: !this.data.showLogPanel });
+  },
+
+  closeLogPanel() {
+    this.setData({ showLogPanel: false });
+  },
+
   toggleSettings() {
     this.setData({ showSettings: !this.data.showSettings });
   },
-  
+
   closeSettings() {
     this.setData({ showSettings: false });
   },
-  
-  setFontSize(e) {
-    const mode = e.currentTarget.dataset.mode;
-    this.setData({ fontSizeMode: mode });
-    wx.setStorageSync('fontSizeMode', mode);
-  },
-  
+
+  stopProp() {},
+
   toggleAutoClear(e) {
     this.setData({ 'settings.autoClearLog': e.detail.value });
-    if (e.detail.value) {
-        this.setData({ logList: [] });
-    }
   },
-  
+
   toggleAutoReconnect(e) {
     this.setData({ 'settings.autoReconnect': e.detail.value });
   },
 
-  stopProp() {}
+  onFilterInput(e) {
+    this.setData({ filterDeviceName: e.detail.value });
+  },
+
+  clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
 });

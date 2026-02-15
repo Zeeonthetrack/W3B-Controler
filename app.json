@@ -3,12 +3,11 @@
     "pages/index/index",
     "pages/logs/logs"
   ],
-  "pageOrientation": "landscape",
   "window": {
     "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#fff",
+    "navigationBarBackgroundColor": "#000000",
     "navigationBarTitleText": "W3B蓝牙遥控器",
-    "navigationBarTextStyle": "black"
+    "navigationBarTextStyle": "white"
   },
   "permission": {
     "scope.userLocation": {

@@ -28,8 +28,16 @@ Page({
     leftStick: { x: 0, y: 0 },
     rightStick: { x: 0, y: 0 },
     logList: [],
+
+    // --- 新增交互逻辑数据 ---
+    leftVis: false,
+    leftPos: { top: 0, left: 0 },
+    rightVis: false,
+    rightPos: { top: 0, left: 0 },
+    showLogs: false,
     
     // --- 新增设置数据 ---
+    fontSizeMode: "mode-m", // 默认中号字号: mode-s, mode-m, mode-l
     showSettings: false, 
     settings: {
       autoClearLog: false,
@@ -42,6 +50,11 @@ Page({
   activeTouches: { left: null, right: null },
 
   onLoad() {
+    // --- 新增: 读取字号配置 ---
+    const savedMode = wx.getStorageSync('fontSizeMode');
+    if (savedMode) {
+      this.setData({ fontSizeMode: savedMode });
+    }
     this.initBluetooth();
   },
 
@@ -266,11 +279,29 @@ Page({
 
   onJoystickStart(e) {
     const side = e.currentTarget.dataset.side;
-    if (!this.padRect[side]) return;
-    if (this.activeTouches[side] !== null) return;
-
     const touch = e.changedTouches[0];
-    // 只记录首次按下的那根手指编号，确保左右摇杆独立
+    
+    const sys = wx.getSystemInfoSync();
+    const joySize = sys.windowHeight * 0.20; 
+    
+    const stickPosKey = side === "left" ? "leftPos" : "rightPos";
+    const visKey = side === "left" ? "leftVis" : "rightVis";
+
+    this.setData({
+      [visKey]: true,
+      [stickPosKey]: { 
+        left: touch.pageX - joySize / 2, 
+        top: touch.pageY - joySize / 2 
+      }
+    });
+
+    this.padRect[side] = {
+      left: touch.pageX - joySize / 2,
+      top: touch.pageY - joySize / 2,
+      width: joySize,
+      height: joySize
+    };
+
     this.activeTouches[side] = touch.identifier;
     this.updateJoystickByTouch(side, touch);
   },
@@ -293,7 +324,10 @@ Page({
 
     const touch = this.findTouchById(e.changedTouches, activeId);
     if (!touch) return;
-
+// --- 重构: 60% 行程满速 --- 
+    // 原公式: value = (-dy / maxRadius) * 100
+    // 新公式: 分母乘 0.6
+    const value = Math.round((-dy / (maxRadius * 0.6)
     this.activeTouches[side] = null;
     const speedKey = side === "left" ? "leftSpeed" : "rightSpeed";
     const stickKey = side === "left" ? "leftStick" : "rightStick";
@@ -305,14 +339,13 @@ Page({
     this.syncBytesAndSend();
   },
 
-  updateJoystickByTouch(side, touch) {
-    const rect = this.padRect[side];
-    if (!rect) return;
+    this.activeTouches[side] = null;
+    const speedKey = side === "left" ? "leftSpeed" : "rightSpeed";
+    const stickKey = side === "left" ? "leftStick" : "rightStick";
+    const visKey = side === "left" ? "leftVis" : "rightVis";
 
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    const stickRadius = rect.width * 0.18;
-    const maxRadius = rect.width / 2 - stickRadius;
+    this.setData({
+      [visKey]: false,s = rect.width / 2 - stickRadius;
 
     let dx = touch.pageX - centerX;
     let dy = touch.pageY - centerY;
@@ -326,7 +359,7 @@ Page({
 
     // 竖直方向严格线性映射：最下 -100，最上 +100
     const value = Math.round((-dy / maxRadius) * 100);
-    const speed = this.clamp(value, -100, 100);
+    const speed = this.clamp(value, (maxRadius * 0.6));
 
     const speedKey = side === "left" ? "leftSpeed" : "rightSpeed";
     const stickKey = side === "left" ? "leftStick" : "rightStick";
@@ -435,12 +468,16 @@ Page({
   },
 
   formatTime(date) {
-    const pad = (num) => num.toString().padStart(2, "0");
+    consLogs() {
+    thist pad = (num) => num.toString().padStart(2, "0");
     return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
   },
 
   /* --- 新增设置面板方法 (不影响核心逻辑) --- */
-  toggleSettings() {
+  toggleLogs() {
+    this.setData({ showLogs: !this.data.showLogs });
+  },
+
     this.setData({ showSettings: !this.data.showSettings });
   },
 
@@ -454,6 +491,13 @@ Page({
 
   toggleAutoClear(e) {
     this.setData({ 'settings.autoClearLog': e.detail.value });
+  },
+
+  // --- 新增: 切换字号方法 ---
+  setFontSize(e) {
+    const mode = e.currentTarget.dataset.mode;
+    this.setData({ fontSizeMode: mode });
+    wx.setStorageSync('fontSizeMode', mode);
   },
 
   toggleAutoReconnect(e) {

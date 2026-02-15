@@ -1,0 +1,144 @@
+<!--index.wxml-->
+<view class="container">
+  <!-- 1. Top Section (15%) - Status, Controls & Settings -->
+  <view class="top-section">
+    <view class="status-row">
+      <view class="status-group">
+        <text class="label">状态:</text>
+        <text class="value">{{connectStatus}}</text>
+      </view>
+      <!-- Settings Button (Top Right) -->
+      <view class="settings-btn" bindtap="toggleSettings">
+        <text class="gear-icon">⚙</text>
+      </view>
+    </view>
+    
+    <view class="control-bar">
+      <button class="action-btn" bindtap="startSearch" disabled="{{isSearching}}">
+        {{isSearching ? '...' : '搜索'}}
+      </button>
+      <button class="action-btn" bindtap="reconnectLast" disabled="{{isConnected || !lastDeviceId}}">
+        重连
+      </button>
+      <button class="action-btn danger" bindtap="disconnectDevice" disabled="{{!isConnected}}">
+        断开
+      </button>
+    </view>
+  </view>
+
+  <!-- 2. Middle Section (20%) - Data Packets & Logs (Fixed Height, No Overflow) -->
+  <view class="middle-section">
+    <!-- Log Area -->
+    <view class="log-box">
+      <view class="box-header">
+        <text class="box-title">数据包日志</text>
+        <view class="clear-btn" bindtap="clearLog">清空</view>
+      </view>
+      <!-- Force scroll-view to stay within bounds -->
+      <scroll-view class="log-scroll" scroll-y="true">
+        <view class="log-item" wx:for="{{logList}}" wx:key="index">
+          <text class="time">[{{item.time}}]</text>
+          <text class="hex">{{item.hex}}</text>
+        </view>
+      </scroll-view>
+    </view>
+
+    <!-- Device List Overlay (Absolute over middle section) -->
+    <view class="device-list-overlay" wx:if="{{deviceList.length > 0}}">
+      <view class="overlay-title">点击连接设备 ({{deviceList.length}})</view>
+      <scroll-view class="device-scroll" scroll-y="true">
+        <view 
+          class="device-item" 
+          wx:for="{{deviceList}}" 
+          wx:key="deviceId" 
+          bindtap="connectDevice" 
+          data-deviceid="{{item.deviceId}}"
+        >
+          <text class="name">{{item.name}}</text>
+          <text class="rssi">{{item.RSSI}}dBm</text>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+
+  <!-- 3. Bottom Section (65%) - Controllers (Fixed Position) -->
+  <view class="bottom-section">
+    <!-- Left Joystick -->
+    <view class="joystick-container left-container">
+      <view class="data-display">
+        <text>L: {{leftSpeed}}</text>
+        <text class="byte-val">0x{{leftByte}}</text>
+      </view>
+      <view 
+        class="joystick-area"
+        id="leftPad"
+        data-side="left"
+        bindtouchstart="onJoystickStart"
+        bindtouchmove="onJoystickMove"
+        bindtouchend="onJoystickEnd"
+        bindtouchcancel="onJoystickEnd"
+      >
+        <view class="joystick-bg">
+          <view class="stick" style="transform: translate({{leftStick.x}}px, {{leftStick.y}}px);"></view>
+        </view>
+      </view>
+    </view>
+
+    <!-- Center Buttons -->
+    <view class="center-controls">
+      <view class="dpad-grid">
+        <view class="dpad-btn red {{btnRed?'active':''}}" data-color="red" bindtouchstart="onButtonTouchStart" bindtouchend="onButtonTouchEnd">A</view>
+        <view class="dpad-btn blue {{btnBlue?'active':''}}" data-color="blue" bindtouchstart="onButtonTouchStart" bindtouchend="onButtonTouchEnd">B</view>
+        <view class="dpad-btn green {{btnGreen?'active':''}}" data-color="green" bindtouchstart="onButtonTouchStart" bindtouchend="onButtonTouchEnd">C</view>
+        <view class="dpad-btn yellow {{btnYellow?'active':''}}" data-color="yellow" bindtouchstart="onButtonTouchStart" bindtouchend="onButtonTouchEnd">D</view>
+      </view>
+    </view>
+
+    <!-- Right Joystick -->
+    <view class="joystick-container right-container">
+      <view class="data-display">
+        <text>R: {{rightSpeed}}</text>
+        <text class="byte-val">0x{{rightByte}}</text>
+      </view>
+      <view 
+        class="joystick-area"
+        id="rightPad"
+        data-side="right"
+        bindtouchstart="onJoystickStart"
+        bindtouchmove="onJoystickMove"
+        bindtouchend="onJoystickEnd"
+        bindtouchcancel="onJoystickEnd"
+      >
+        <view class="joystick-bg">
+          <view class="stick" style="transform: translate({{rightStick.x}}px, {{rightStick.y}}px);"></view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Floating Settings Modal (Fullscreen Overlay) -->
+  <view class="modal-overlay" wx:if="{{showSettings}}" bindtap="closeSettings" catchtouchmove="stopProp">
+    <view class="modal-content" catchtap="stopProp">
+      <view class="modal-header">设置面板</view>
+      
+      <view class="setting-item">
+        <text class="setting-label">自动清空日志</text>
+        <switch checked="{{settings.autoClearLog}}" bindchange="toggleAutoClear" color="#2b6fff" style="transform: scale(0.7);"/>
+      </view>
+      
+      <view class="setting-item">
+        <text class="setting-label">断开自动重连</text>
+        <switch checked="{{settings.autoReconnect}}" bindchange="toggleAutoReconnect" color="#2b6fff" style="transform: scale(0.7);"/>
+      </view>
+      
+      <view class="setting-item">
+        <text class="setting-label">字体大小</text>
+        <view class="setting-value">默认</view>
+      </view>
+
+      <view class="modal-footer">
+        <button class="close-btn" bindtap="closeSettings">关闭</button>
+      </view>
+    </view>
+  </view>
+</view>

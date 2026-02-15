@@ -28,8 +28,16 @@ Page({
     leftStick: { x: 0, y: 0 },
     rightStick: { x: 0, y: 0 },
     logList: [],
+
+    // --- 新增交互逻辑数据 ---
+    leftVis: false,
+    leftPos: { top: 0, left: 0 },
+    rightVis: false,
+    rightPos: { top: 0, left: 0 },
+    showLogs: false,
     
     // --- 新增设置数据 ---
+    fontSizeMode: "mode-m", // 默认中号字号: mode-s, mode-m, mode-l
     showSettings: false, 
     settings: {
       autoClearLog: false,
@@ -42,6 +50,11 @@ Page({
   activeTouches: { left: null, right: null },
 
   onLoad() {
+    // --- 新增: 读取字号配置 ---
+    const savedMode = wx.getStorageSync('fontSizeMode');
+    if (savedMode) {
+      this.setData({ fontSizeMode: savedMode });
+    }
     this.initBluetooth();
   },
 
@@ -264,11 +277,43 @@ Page({
     });
   },
 
+    // --- 重构: 摇杆跟随手指逻辑 ---
+    // 1. 获取屏幕信息，计算 20vh 的像素值 (用于居中显示)
+    // 简单起见，这里不需要精确尺寸，只需要设置中心点
+    const sys = wx.getSystemInfoSync();
+    // 摇杆直径约 20vh
+    const joySize = sys.windowHeight * 0.20; 
+    
+    // 2. 动态设置摇杆中心点
+    // 视觉上，摇杆外盘左上角位置 = 触点 - 半径
+    const stickPosKey = side === "left" ? "leftPos" : "rightPos";
+    const visKey = side === "left" ? "leftVis" : "rightVis";
+
+    this.setData({
+      [visKey]: true,
+      [stickPosKey]: { 
+        left: touch.pageX - joySize / 2, 
+        top: touch.pageY - joySize / 2 
+      }
+    });
+
+    // 3. 更新 padRect，让后续的 updateJoystickByTouch 基于此新中心计算
+    // 这样核心计算逻辑完全不需要改动
+    this.padRect[side] = {
+      left: touch.pageX - joySize / 2,
+      top: touch.pageY - joySize / 2,
+      width: joySize,
+      height: joySize
+    };
+
+    
   onJoystickStart(e) {
     const side = e.currentTarget.dataset.side;
     if (!this.padRect[side]) return;
-    if (this.activeTouches[side] !== null) return;
+    const visKey = side === "left" ? "leftVis" : "rightVis";
 
+    this.setData({
+      [visKey]: false, // 隐藏摇杆
     const touch = e.changedTouches[0];
     // 只记录首次按下的那根手指编号，确保左右摇杆独立
     this.activeTouches[side] = touch.identifier;
@@ -293,7 +338,10 @@ Page({
 
     const touch = this.findTouchById(e.changedTouches, activeId);
     if (!touch) return;
-
+// --- 重构: 60% 行程满速 --- 
+    // 原公式: value = (-dy / maxRadius) * 100
+    // 新公式: 分母乘 0.6
+    const value = Math.round((-dy / (maxRadius * 0.6)
     this.activeTouches[side] = null;
     const speedKey = side === "left" ? "leftSpeed" : "rightSpeed";
     const stickKey = side === "left" ? "leftStick" : "rightStick";
@@ -435,7 +483,11 @@ Page({
   },
 
   formatTime(date) {
-    const pad = (num) => num.toString().padStart(2, "0");
+    consLogs() {
+    this.setData({ showLogs: !this.data.showLogs });
+  },
+
+  togglet pad = (num) => num.toString().padStart(2, "0");
     return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
   },
 
@@ -454,6 +506,13 @@ Page({
 
   toggleAutoClear(e) {
     this.setData({ 'settings.autoClearLog': e.detail.value });
+  },
+
+  // --- 新增: 切换字号方法 ---
+  setFontSize(e) {
+    const mode = e.currentTarget.dataset.mode;
+    this.setData({ fontSizeMode: mode });
+    wx.setStorageSync('fontSizeMode', mode);
   },
 
   toggleAutoReconnect(e) {

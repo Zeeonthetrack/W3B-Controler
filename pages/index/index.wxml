@@ -11,7 +11,7 @@ module.exports = {
 }
 </wxs>
 
-<view class="container">
+<view class="container font-{{settings.fontSize}}">
   <!-- 顶部功能区 (20vh) -->
   <view class="top-section">
     <view class="top-left">

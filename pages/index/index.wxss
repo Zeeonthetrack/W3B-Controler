@@ -26,8 +26,12 @@ page {
   background-image: 
     linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 4vh 4vh; /* Grid background */
+  background-size: 4vh 4vh;
 }
+
+.font-small { font-size: 12px; }
+.font-medium { font-size: 14px; }
+.font-large { font-size: 18px; }
 
 /* Common Glass Effect */
 .glass-panel, .glass-btn, .glass-icon-btn, .top-section, .full-overlay .overlay-panel {
@@ -126,6 +130,10 @@ page {
   display: flex;
   align-items: center;
   gap: 1.5vw;
+}
+.switch-row switch {
+  transform: scale(0.6);
+  transform-origin: left center;
 }
 .switch-label {
   font-size: 2vh;

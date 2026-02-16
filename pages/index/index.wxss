@@ -127,6 +127,10 @@ page {
   align-items: center;
   gap: 1.5vw;
 }
+.switch-row switch {
+  transform: scale(0.6);
+  transform-origin: left center;
+}
 .switch-label {
   font-size: 2vh;
   color: #CCCCCC;

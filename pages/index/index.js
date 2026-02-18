@@ -39,6 +39,9 @@ Page({
     },
     tempSettings: {}, // For holding unsaved changes
     sendTimer: null,
+    
+    navBarHeight: 0,
+    menuButtonInfo: {},
   },
 
   padRect: { left: null, right: null },
@@ -46,6 +49,16 @@ Page({
 
   onLoad() {
     const that = this;
+    
+    const systemInfo = wx.getSystemInfoSync();
+    const menuButtonInfo = wx.getMenuButtonBoundingClientRect();
+    const navBarHeight = (menuButtonInfo.height + (menuButtonInfo.top - systemInfo.statusBarHeight) * 2) * 1.2;
+    
+    that.setData({
+      navBarHeight: navBarHeight,
+      menuButtonInfo: menuButtonInfo
+    });
+    
     wx.getStorage({
       key: 'userSettings',
       success (res) {

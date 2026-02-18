@@ -12,7 +12,14 @@ module.exports = {
 </wxs>
 
 <view class="container font-{{settings.fontSize}}">
-  <!-- 顶部功能区 (20vh) -->
+  <!-- 自定义导航栏 -->
+  <view class="custom-nav-bar" style="height: {{navBarHeight}}px;">
+    <view class="nav-bar-title">W3B蓝牙遥控器</view>
+  </view>
+  
+  <!-- 内容区域 -->
+  <view class="content-wrapper">
+    <!-- 顶部功能区 (20vh) -->
   <view class="top-section">
     <view class="top-left">
       <!-- 蓝牙状态 -->
@@ -160,6 +167,8 @@ module.exports = {
     </view>
   </view>
 
+  </view>
+  
   <!-- 设置悬浮窗 -->
   <view class="full-overlay glass-background" wx:if="{{showSettings}}" catchtap="closeSettings">
     <view class="overlay-panel ios-settings-panel" catchtap="stopProp">

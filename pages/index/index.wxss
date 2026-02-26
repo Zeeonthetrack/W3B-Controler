@@ -293,6 +293,30 @@ page {
   align-items: center;
   justify-content: center;
   position: relative;
+  /* Removed transition to ensure responsive drag */
+}
+
+/* Edit Mode Styles */
+.edit-toolbar {
+  display: flex;
+  gap: 2vw;
+}
+
+.editing-zone {
+  border: 1px dashed rgba(255, 235, 59, 0.7);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  z-index: 50; /* Bring to top when editing */
+}
+
+.edit-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10; /* Above content */
+  background: transparent;
 }
 
 .left-zone, .right-zone { flex: 0 0 33vw; }

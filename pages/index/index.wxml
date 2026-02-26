@@ -38,8 +38,15 @@ module.exports = {
     </view>
 
     <view class="top-right">
-      <view class="glass-icon-btn" bindtap="toggleLogPanel" hover-class="btn-hover">LOG</view>
-      <view class="glass-icon-btn" bindtap="toggleSettings" hover-class="btn-hover">⚙</view>
+      <view class="glass-icon-btn" bindtap="toggleLogPanel" hover-class="btn-hover" wx:if="{{!isEditMode}}">LOG</view>
+      <view class="glass-icon-btn" bindtap="toggleSettings" hover-class="btn-hover" wx:if="{{!isEditMode}}">⚙</view>
+      <view class="glass-icon-btn" bindtap="toggleEditMode" hover-class="btn-hover" wx:if="{{!isEditMode}}">✎</view>
+      
+      <!-- Edit Mode Toolbar -->
+      <view class="edit-toolbar" wx:if="{{isEditMode}}">
+        <view class="glass-btn warning" bindtap="restoreDefaultLayout">重置</view>
+        <view class="glass-btn primary" bindtap="saveLayout">保存</view>
+      </view>
     </view>
   </view>
 
@@ -83,7 +90,16 @@ module.exports = {
   <!-- 底部操控区 (40vh) -->
   <view class="bottom-section">
     <!-- 左摇杆区 (33vw) -->
-    <view class="control-zone joystick-zone left-zone">
+    <view class="control-zone joystick-zone left-zone {{isEditMode ? 'editing-zone' : ''}}"
+          style="transform: translate({{layout.leftJoystick.x}}px, {{layout.leftJoystick.y}}px) scale({{layout.leftJoystick.scale}});"
+          data-key="leftJoystick"
+          catchtouchstart="{{isEditMode ? 'onLayoutTouchStart' : ''}}"
+          catchtouchmove="{{isEditMode ? 'onLayoutTouchMove' : ''}}"
+          catchtouchend="{{isEditMode ? 'onLayoutTouchEnd' : ''}}">
+      
+      <!-- Edit Overlay Mask -->
+      <view class="edit-mask" wx:if="{{isEditMode}}"></view>
+
       <view class="joystick-value">
         <text>L: {{leftSpeed}}</text>
       </view>
@@ -91,10 +107,10 @@ module.exports = {
         class="joystick-area"
         id="leftPad"
         data-side="left"
-        bindtouchstart="onJoystickStart"
-        bindtouchmove="onJoystickMove"
-        bindtouchend="onJoystickEnd"
-        bindtouchcancel="onJoystickEnd"
+        bindtouchstart="{{!isEditMode ? 'onJoystickStart' : ''}}"
+        bindtouchmove="{{!isEditMode ? 'onJoystickMove' : ''}}"
+        bindtouchend="{{!isEditMode ? 'onJoystickEnd' : ''}}"
+        bindtouchcancel="{{!isEditMode ? 'onJoystickEnd' : ''}}"
       >
         <view class="joystick-base">
           <view class="joystick-stick" style="transform: translate({{leftStick.x}}px, {{leftStick.y}}px);"></view>
@@ -103,17 +119,33 @@ module.exports = {
     </view>
 
     <!-- 中间按钮区 (34vw) -->
-    <view class="control-zone buttons-zone">
+    <view class="control-zone buttons-zone {{isEditMode ? 'editing-zone' : ''}}"
+          style="transform: translate({{layout.buttons.x}}px, {{layout.buttons.y}}px) scale({{layout.buttons.scale}});"
+          data-key="buttons"
+          catchtouchstart="{{isEditMode ? 'onLayoutTouchStart' : ''}}"
+          catchtouchmove="{{isEditMode ? 'onLayoutTouchMove' : ''}}"
+          catchtouchend="{{isEditMode ? 'onLayoutTouchEnd' : ''}}">
+      
+      <view class="edit-mask" wx:if="{{isEditMode}}"></view>
+
       <view class="btn-grid">
-        <view class="game-btn red {{btnRed?'active':''}}" data-color="red" bindtouchstart="onButtonTouchStart" bindtouchend="onButtonTouchEnd">A</view>
-        <view class="game-btn blue {{btnBlue?'active':''}}" data-color="blue" bindtouchstart="onButtonTouchStart" bindtouchend="onButtonTouchEnd">B</view>
-        <view class="game-btn green {{btnGreen?'active':''}}" data-color="green" bindtouchstart="onButtonTouchStart" bindtouchend="onButtonTouchEnd">C</view>
-        <view class="game-btn yellow {{btnYellow?'active':''}}" data-color="yellow" bindtouchstart="onButtonTouchStart" bindtouchend="onButtonTouchEnd">D</view>
+        <view class="game-btn red {{btnRed?'active':''}}" data-color="red" bindtouchstart="{{!isEditMode ? 'onButtonTouchStart' : ''}}" bindtouchend="{{!isEditMode ? 'onButtonTouchEnd' : ''}}">A</view>
+        <view class="game-btn blue {{btnBlue?'active':''}}" data-color="blue" bindtouchstart="{{!isEditMode ? 'onButtonTouchStart' : ''}}" bindtouchend="{{!isEditMode ? 'onButtonTouchEnd' : ''}}">B</view>
+        <view class="game-btn green {{btnGreen?'active':''}}" data-color="green" bindtouchstart="{{!isEditMode ? 'onButtonTouchStart' : ''}}" bindtouchend="{{!isEditMode ? 'onButtonTouchEnd' : ''}}">C</view>
+        <view class="game-btn yellow {{btnYellow?'active':''}}" data-color="yellow" bindtouchstart="{{!isEditMode ? 'onButtonTouchStart' : ''}}" bindtouchend="{{!isEditMode ? 'onButtonTouchEnd' : ''}}">D</view>
       </view>
     </view>
 
     <!-- 右摇杆区 (33vw) -->
-    <view class="control-zone joystick-zone right-zone">
+    <view class="control-zone joystick-zone right-zone {{isEditMode ? 'editing-zone' : ''}}"
+          style="transform: translate({{layout.rightJoystick.x}}px, {{layout.rightJoystick.y}}px) scale({{layout.rightJoystick.scale}});"
+          data-key="rightJoystick"
+          catchtouchstart="{{isEditMode ? 'onLayoutTouchStart' : ''}}"
+          catchtouchmove="{{isEditMode ? 'onLayoutTouchMove' : ''}}"
+          catchtouchend="{{isEditMode ? 'onLayoutTouchEnd' : ''}}">
+      
+      <view class="edit-mask" wx:if="{{isEditMode}}"></view>
+
       <view class="joystick-value">
         <text>R: {{rightSpeed}}</text>
       </view>
@@ -121,10 +153,10 @@ module.exports = {
         class="joystick-area"
         id="rightPad"
         data-side="right"
-        bindtouchstart="onJoystickStart"
-        bindtouchmove="onJoystickMove"
-        bindtouchend="onJoystickEnd"
-        bindtouchcancel="onJoystickEnd"
+        bindtouchstart="{{!isEditMode ? 'onJoystickStart' : ''}}"
+        bindtouchmove="{{!isEditMode ? 'onJoystickMove' : ''}}"
+        bindtouchend="{{!isEditMode ? 'onJoystickEnd' : ''}}"
+        bindtouchcancel="{{!isEditMode ? 'onJoystickEnd' : ''}}"
       >
         <view class="joystick-base">
           <view class="joystick-stick" style="transform: translate({{rightStick.x}}px, {{rightStick.y}}px);"></view>

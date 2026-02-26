@@ -42,6 +42,17 @@ Page({
     
     navBarHeight: 0,
     menuButtonInfo: {},
+
+    // --- Custom Layout Mode Data ---
+    isEditMode: false,
+    activeElement: null, // 'leftJoystick', 'rightJoystick', 'buttons'
+    layout: {
+      leftJoystick: { x: 0, y: 0, scale: 1 },
+      rightJoystick: { x: 0, y: 0, scale: 1 },
+      buttons: { x: 0, y: 0, scale: 1 }
+    },
+    initialLayout: null, // To store initial state when drag starts
+    touchStart: null, // { x, y } or distance for pinch
   },
 
   onLoad() {
@@ -49,6 +60,12 @@ Page({
     this.activeTouches = { left: null, right: null };
     
     const that = this;
+    
+    // Load custom layout
+    const savedLayout = wx.getStorageSync('customLayout');
+    if (savedLayout) {
+      that.setData({ layout: savedLayout });
+    }
     
     const systemInfo = wx.getSystemInfoSync();
     const menuButtonInfo = wx.getMenuButtonBoundingClientRect();
@@ -69,6 +86,7 @@ Page({
         that.startSendLoop();
       }
     });
+
     this.initBluetooth();
   },
 
@@ -559,6 +577,111 @@ Page({
       key: 'userSettings',
       data: this.data.settings
     });
+  },
+
+  // --- Layout Customization ---
+  toggleEditMode() {
+    this.setData({ isEditMode: !this.data.isEditMode });
+  },
+
+  // Handle Drag & Pinch Scale
+  onLayoutTouchStart(e) {
+    if (!this.data.isEditMode) return;
+    const key = e.currentTarget.dataset.key;
+    const touches = e.touches;
+    
+    if (touches.length === 1) {
+       // Drag Start
+       this.dragState = {
+         mode: 'drag',
+         key: key,
+         startX: touches[0].clientX,
+         startY: touches[0].clientY,
+         initialX: this.data.layout[key].x,
+         initialY: this.data.layout[key].y
+       };
+    } else if (touches.length >= 2) {
+       // Pinch Start
+       const x1 = touches[0].clientX;
+       const y1 = touches[0].clientY;
+       const x2 = touches[1].clientX;
+       const y2 = touches[1].clientY;
+       const dist = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+       
+       this.dragState = {
+         mode: 'scale',
+         key: key,
+         startDist: dist,
+         initialScale: this.data.layout[key].scale
+       };
+    }
+  },
+
+  onLayoutTouchMove(e) {
+    if (!this.data.isEditMode || !this.dragState) return;
+    const touches = e.touches;
+    const key = this.dragState.key;
+    
+    // Check if mode changed (e.g. 1 finger -> 2 fingers)
+    if (this.dragState.mode === 'drag' && touches.length >= 2) {
+        // Switch to scale logic immediately or just ignore. 
+        // Better to ignore or reset. Let's restart logic for simplicity:
+        // just return to avoid jumpiness.
+        return;
+    }
+
+    if (this.dragState.mode === 'drag' && touches.length === 1) {
+      const dx = touches[0].clientX - this.dragState.startX;
+      const dy = touches[0].clientY - this.dragState.startY;
+      const newX = this.dragState.initialX + dx;
+      const newY = this.dragState.initialY + dy;
+      
+      this.setData({
+        [`layout.${key}.x`]: newX,
+        [`layout.${key}.y`]: newY
+      });
+    } else if (this.dragState.mode === 'scale' && touches.length >= 2) {
+       const x1 = touches[0].clientX;
+       const y1 = touches[0].clientY;
+       const x2 = touches[1].clientX;
+       const y2 = touches[1].clientY;
+       const dist = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+       
+       if (this.dragState.startDist > 0) {
+         const scale = this.dragState.initialScale * (dist / this.dragState.startDist);
+         // Clamp scale
+         const clamped = Math.max(0.5, Math.min(2.5, scale));
+         this.setData({
+           [`layout.${key}.scale`]: clamped
+         });
+       }
+    }
+  },
+
+  onLayoutTouchEnd(e) {
+    if (!this.data.isEditMode) return;
+    // If all fingers lifted, reset state
+    if (e.touches.length === 0) {
+      this.dragState = null;
+    }
+  },
+
+  saveLayout() {
+    wx.setStorageSync('customLayout', this.data.layout);
+    this.setData({ isEditMode: false });
+    wx.showToast({ title: '布局已保存' });
+  },
+
+  restoreDefaultLayout() {
+    this.setData({
+      layout: {
+        leftJoystick: { x: 0, y: 0, scale: 1 },
+        rightJoystick: { x: 0, y: 0, scale: 1 },
+        buttons: { x: 0, y: 0, scale: 1 }
+      }
+    });
+    // Optional: remove storage now or wait for save
+    // wx.removeStorageSync('customLayout'); 
   },
 
   clamp(value, min, max) {

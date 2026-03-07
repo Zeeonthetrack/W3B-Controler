@@ -725,3 +725,175 @@ page {
   width: 45%;
   text-align: right;
 }
+
+/* ========== 自定义数字键盘样式 ========== */
+.custom-keyboard-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 999;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+  animation: fadeIn 0.2s ease-out;
+}
+
+.custom-keyboard {
+  width: 100vw;
+  max-width: 500px;
+  background: rgba(30, 30, 30, 0.95);
+  border-radius: 20px 20px 0 0;
+  overflow: hidden;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: none;
+}
+
+/* 键盘标题栏 */
+.keyboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2vh 5vw;
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.keyboard-title {
+  font-size: 1.2em;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.keyboard-close {
+  font-size: 1.8em;
+  color: #8E8E93;
+  padding: 0 1vw;
+  transition: all 0.2s;
+}
+
+.keyboard-close:hover {
+  color: #FFFFFF;
+}
+
+/* 输入显示区域 */
+.keyboard-input {
+  padding: 3vh 5vw;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.keyboard-input-field {
+  width: 100%;
+  text-align: center;
+  font-size: 2em;
+  font-weight: 600;
+  color: #FFFFFF;
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+/* 按键区域 */
+.keyboard-buttons {
+  padding: 2vh 3vw;
+}
+
+/* 按键行 */
+.keyboard-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2vh;
+}
+
+/* 按键基础样式 */
+.keyboard-btn {
+  flex: 1;
+  margin: 0 1vw;
+  height: 12vh;
+  max-height: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.8em;
+  font-weight: 600;
+  border-radius: 12px;
+  transition: all 0.1s ease;
+  user-select: none;
+}
+
+/* 数字按键样式 */
+.keyboard-btn.number {
+  background: rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.keyboard-btn.number:active {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(0.95);
+}
+
+/* 删除和清空按键样式 */
+.keyboard-btn.delete,
+.keyboard-btn.clear {
+  background: rgba(255, 69, 58, 0.2);
+  color: #FF453A;
+  font-size: 1.2em;
+}
+
+.keyboard-btn.delete:active,
+.keyboard-btn.clear:active {
+  background: rgba(255, 69, 58, 0.3);
+  transform: scale(0.95);
+}
+
+/* 确认按键样式 */
+.keyboard-btn.confirm {
+  background: rgba(52, 199, 89, 0.2);
+  color: #34C759;
+  font-size: 1.5em;
+  height: 10vh;
+  max-height: 60px;
+}
+
+.keyboard-btn.confirm:active {
+  background: rgba(52, 199, 89, 0.3);
+  transform: scale(0.95);
+}
+
+/* 响应式设计，适配小屏幕 */
+@media screen and (max-height: 600px) {
+  .keyboard-btn {
+    height: 10vh;
+    font-size: 1.5em;
+  }
+  
+  .keyboard-input-field {
+    font-size: 1.5em;
+  }
+  
+  .keyboard-btn.confirm {
+    height: 8vh;
+    font-size: 1.2em;
+  }
+}
+
+/* 适配大屏幕 */
+@media screen and (min-width: 500px) {
+  .custom-keyboard {
+    border-radius: 20px;
+    margin-bottom: 5vh;
+    width: 90vw;
+    max-width: 400px;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}

@@ -69,7 +69,7 @@ module.exports = {
     <view class="device-list-overlay glass-panel" wx:if="{{deviceList.length > 0}}">
       <view class="overlay-header">
         <text class="overlay-title">发现设备 ({{deviceList.length}})</text>
-        <view class="close-btn" catchtap="stopSearch">✕</view>
+        <view class="close-btn" catchtap="closeDeviceList">✕</view>
       </view>
       <scroll-view class="device-scroll" scroll-y="true">
         <view 
@@ -210,12 +210,15 @@ module.exports = {
         <view class="ios-group-title">通信参数</view>
         <view class="ios-group">
           <view class="ios-cell">
-            <text class="cell-label">数据包使用二进制</text>
-            <switch checked="{{tempSettings.useBinary}}" data-field="useBinary" bindchange="onSettingChange" color="#34C759"/>
+            <text class="cell-label">发送模式</text>
+            <view class="segment-control">
+              <view class="segment-item {{tempSettings.sendMode==='text'?'active':''}}" data-field="sendMode" data-value="text" catchtap="onModeChange">文本模式</view>
+              <view class="segment-item {{tempSettings.sendMode==='binary'?'active':''}}" data-field="sendMode" data-value="binary" catchtap="onModeChange">二进制模式</view>
+            </view>
           </view>
           <view class="ios-cell last">
             <text class="cell-label">发送间隔(ms)</text>
-            <input class="cell-input" type="number" value="{{tempSettings.sendInterval}}" data-field="sendInterval" bindinput="onSettingChange"/>
+            <input class="cell-input" type="text" value="{{tempSettings.sendInterval}}" data-field="sendInterval" bindtap="showCustomKeyboard" readonly/>
           </view>
         </view>
 
@@ -244,6 +247,52 @@ module.exports = {
           </view>
         </view>
       </scroll-view>
+    </view>
+  </view>
+  
+  <!-- 自定义数字键盘 -->
+  <view class="custom-keyboard-overlay" wx:if="{{showCustomKeyboard}}" catchtap="hideCustomKeyboard">
+    <view class="custom-keyboard" catchtap="stopProp">
+      <!-- 键盘标题 -->
+      <view class="keyboard-header">
+        <text class="keyboard-title">{{keyboardTitle}}</text>
+        <view class="keyboard-close" catchtap="hideCustomKeyboard">×</view>
+      </view>
+      <!-- 输入显示 -->
+      <view class="keyboard-input">
+        <input class="keyboard-input-field" type="text" value="{{currentInputValue}}" placeholder="0" readonly/>
+      </view>
+      <!-- 键盘按键 -->
+      <view class="keyboard-buttons">
+        <!-- 第一行 -->
+        <view class="keyboard-row">
+          <view class="keyboard-btn number" catchtap="onKeyboardNumberTap" data-number="1">1</view>
+          <view class="keyboard-btn number" catchtap="onKeyboardNumberTap" data-number="2">2</view>
+          <view class="keyboard-btn number" catchtap="onKeyboardNumberTap" data-number="3">3</view>
+        </view>
+        <!-- 第二行 -->
+        <view class="keyboard-row">
+          <view class="keyboard-btn number" catchtap="onKeyboardNumberTap" data-number="4">4</view>
+          <view class="keyboard-btn number" catchtap="onKeyboardNumberTap" data-number="5">5</view>
+          <view class="keyboard-btn number" catchtap="onKeyboardNumberTap" data-number="6">6</view>
+        </view>
+        <!-- 第三行 -->
+        <view class="keyboard-row">
+          <view class="keyboard-btn number" catchtap="onKeyboardNumberTap" data-number="7">7</view>
+          <view class="keyboard-btn number" catchtap="onKeyboardNumberTap" data-number="8">8</view>
+          <view class="keyboard-btn number" catchtap="onKeyboardNumberTap" data-number="9">9</view>
+        </view>
+        <!-- 第四行 -->
+        <view class="keyboard-row">
+          <view class="keyboard-btn clear" catchtap="onKeyboardClearTap">清空</view>
+          <view class="keyboard-btn number" catchtap="onKeyboardNumberTap" data-number="0">0</view>
+          <view class="keyboard-btn delete" catchtap="onKeyboardDeleteTap">删除</view>
+        </view>
+        <!-- 确认按钮 -->
+        <view class="keyboard-row">
+          <view class="keyboard-btn confirm" catchtap="onKeyboardConfirmTap" style="width: 100%;">确认</view>
+        </view>
+      </view>
     </view>
   </view>
 </view>
